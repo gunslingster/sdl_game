@@ -13,9 +13,9 @@ void player_jump(player_t *player)
 void player_move(player_t *player, const Uint8 *keys)
 {
     if (keys[SDL_SCANCODE_A])
-        player->rect.x -= SPEED;
+        player->rect.x -= player->vel_x;
     if (keys[SDL_SCANCODE_D])
-        player->rect.x += SPEED;
+        player->rect.x += player->vel_x;
 }
 
 void player_update_state(player_t *player)
@@ -35,6 +35,11 @@ void player_update_state(player_t *player)
     // Screen boundaries
     if (player->rect.x <= 0)
         player->rect.x = 0;
-    if (player->rect.x >= WIN_WIDTH - player->rect.w)
-        player->rect.x = WIN_WIDTH - player->rect.w;
+    if (player->rect.x >= GRID_WIDTH * TILE_SIZE - player->rect.w)
+        player->rect.x = GRID_WIDTH * TILE_SIZE - player->rect.w;
+    // Screen boundaries
+    if (player->rect.y <= 0)
+        player->rect.y = 0;
+    if (player->rect.y >= GRID_HEIGHT * TILE_SIZE - player->rect.w)
+        player->rect.y = GRID_HEIGHT * TILE_SIZE - player->rect.w;
 }
