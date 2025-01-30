@@ -3,24 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
-#define SPEED 3
-#define WIN_WIDTH 800
-#define WIN_HEIGHT 600
-#define TILE_SIZE 10
-#define GRID_WIDTH (WIN_WIDTH / TILE_SIZE)
-#define GRID_HEIGHT (WIN_HEIGHT / TILE_SIZE)
-const float GRAVITY = 0.5;
-const int GROUND_LEVEL = WIN_HEIGHT - 100; // Adjusted for procedural ground
-
-typedef struct player
-{
-    SDL_Rect rect;
-    float vel_x;
-    float vel_y;
-    float jump_str;
-    int is_jumping;
-} player_t;
+#include "constants.h"
+#include "player.h"
 
 // Cave variables
 #define WALL '#'
@@ -206,36 +190,17 @@ int main(int argc, char *argv[])
                     running = 0;
                 if (event.key.keysym.sym == SDLK_w && !player.is_jumping)
                 {
-                    player.vel_y = player.jump_str;
-                    player.is_jumping = 1;
+                    player_jump(&player);
                 }
             }
         }
 
-        // Apply gravity and movement
-        player.vel_y += GRAVITY;
-        player.rect.y += player.vel_y;
-
-        // Ground collision
-        if (player.rect.y >= GROUND_LEVEL)
-        {
-            player.rect.y = GROUND_LEVEL;
-            player.vel_y = 0;
-            player.is_jumping = 0;
-        }
-
         // Movement controls
         const Uint8 *keys = SDL_GetKeyboardState(NULL);
-        if (keys[SDL_SCANCODE_A])
-            player.rect.x -= SPEED;
-        if (keys[SDL_SCANCODE_D])
-            player.rect.x += SPEED;
+        player_move(&player, keys);
 
-        // Screen boundaries
-        if (player.rect.x <= 0)
-            player.rect.x = 0;
-        if (player.rect.x >= WIN_WIDTH - player.rect.w)
-            player.rect.x = WIN_WIDTH - player.rect.w;
+        // Update player state
+        player_update_state(&player);
 
         // Render cave and player
         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
