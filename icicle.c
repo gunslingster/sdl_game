@@ -2,19 +2,20 @@
 #include "time.h"
 
 icicle_t ICICLES[100];
-static int num_icicles = 0;
 
 void icicle_update_state(icicle_t *icicle)
 {
     if (!icicle->is_falling)
+    {
         goto exit;
+    }
     icicle->vel_y += GRAVITY / 2;
     icicle->rect.y += icicle->vel_y;
 
     // Ground collision
-    if (icicle->rect.y + icicle->rect.h >= GROUND_LEVEL)
+    if (icicle->rect.y >= GROUND_LEVEL)
     {
-        icicle->rect.y = GROUND_LEVEL + icicle->rect.h;
+        // icicle->rect.y = GROUND_LEVEL;
         icicle->vel_y = 0;
         icicle->is_falling = 0;
     }
@@ -36,7 +37,7 @@ exit:
 
 void icicle_update_state_all()
 {
-    for (int i = 0; i < num_icicles; i++)
+    for (int i = 0; i < 100; i++)
     {
         icicle_update_state(&(ICICLES[i]));
     }
@@ -46,10 +47,10 @@ void icicle_spawn()
 {
     // Initialize an icicle with random x position, random size, and random mass
     icicle_t icicle = {.rect = {rand() % (GRID_WIDTH * TILE_SIZE), 0, 50, 50}, .vel_y = 0, .mass = rand() % 10, .is_falling = 1};
-    if (num_icicles < 100)
+    for (int i = 0; i < 100; i++)
     {
-        ICICLES[num_icicles] = icicle;
-        num_icicles++;
+        if (!ICICLES[i].is_falling)
+            ICICLES[i] = icicle;
     }
 }
 
@@ -68,8 +69,9 @@ void icicle_render(icicle_t *icicle, SDL_Texture *icicle_texture, SDL_Renderer *
 
 void icicle_render_all(SDL_Texture *icicle_texture, SDL_Renderer *renderer, int camera_x)
 {
-    for (int i = 0; i < num_icicles; i++)
+    for (int i = 0; i < 100; i++)
     {
-        icicle_render(&ICICLES[i], icicle_texture, renderer, camera_x);
+        if (ICICLES[i].is_falling)
+            icicle_render(&ICICLES[i], icicle_texture, renderer, camera_x);
     }
 }

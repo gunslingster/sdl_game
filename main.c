@@ -11,6 +11,7 @@
 #define WALL '#'
 #define FLOOR '.'
 char cave[GRID_HEIGHT][GRID_WIDTH];
+extern icicle_t ICICLES[100];
 
 typedef struct camera
 {
@@ -152,10 +153,22 @@ SDL_Texture *generateNoiseFloor(SDL_Renderer *renderer)
 
 void renderFloor(SDL_Renderer *renderer, SDL_Texture *floorTexture, int camX)
 {
-    SDL_Rect srcRect = {camX, 0, WIN_WIDTH, WIN_HEIGHT - GROUND_LEVEL}; // Select part of the texture
-    SDL_Rect destRect = {0, GROUND_LEVEL + 50, WIN_WIDTH, WIN_HEIGHT - GROUND_LEVEL};
+    SDL_Rect srcRect = {camX, 0, WIN_WIDTH + TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL}; // Select part of the texture
+    SDL_Rect destRect = {0, GROUND_LEVEL + 50, WIN_WIDTH + TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL};
 
     SDL_RenderCopy(renderer, floorTexture, &srcRect, &destRect);
+}
+
+int check_collisions(player_t player)
+{
+    for (int i = 0; i < 100; i++)
+    {
+        if (!ICICLES[i].is_falling)
+            continue;
+        if (SDL_HasIntersection(&(player.rect), &(ICICLES[i].rect)))
+            return -1;
+    }
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -171,6 +184,7 @@ int main(int argc, char *argv[])
     SDL_Window *window = SDL_CreateWindow("SDL2 Game Window",
                                           SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                           WIN_WIDTH, WIN_HEIGHT, SDL_WINDOW_SHOWN);
+    SDL_SetWindowSize(window, WIN_WIDTH, WIN_HEIGHT);
     if (!window)
     {
         fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
@@ -246,7 +260,7 @@ int main(int argc, char *argv[])
         if (camera.y > GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT))
             camera.y = GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT);
 
-        if (timer == 60)
+        if (timer >= 2)
         {
             icicle_spawn();
             timer = 0;
@@ -257,6 +271,8 @@ int main(int argc, char *argv[])
         }
 
         icicle_update_state_all();
+        if (check_collisions(player))
+            running = 0;
 
         // Render cave and player
         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
