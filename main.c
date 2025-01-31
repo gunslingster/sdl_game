@@ -5,6 +5,7 @@
 #include <time.h>
 #include "constants.h"
 #include "player.h"
+#include "icicle.h"
 
 // Cave variables
 #define WALL '#'
@@ -189,6 +190,7 @@ int main(int argc, char *argv[])
     // Initialize SDL_image
     IMG_Init(IMG_INIT_PNG);
     SDL_Texture *playerTexture = loadTexture("caveman.png", renderer);
+    SDL_Texture *icicleTexture = loadTexture("icicle.png", renderer);
 
     // Initialize cave
     initCave();
@@ -197,12 +199,13 @@ int main(int argc, char *argv[])
     SDL_Texture *floorTexture = generateNoiseFloor(renderer);
 
     // Initialize player
-    player_t player = {.rect = {100, GROUND_LEVEL, 50, 50}, .vel_x = 5, .vel_y = 0, .jump_str = -8, .is_jumping = 0};
+    player_t player = {.rect = {100, GROUND_LEVEL, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -8, .is_jumping = 0};
 
     // Main game loop
     int running = 1;
     SDL_Event event;
     camera_t camera = {0, 0, WIN_WIDTH, WIN_HEIGHT};
+    int timer = 0;
 
     while (running)
     {
@@ -243,11 +246,24 @@ int main(int argc, char *argv[])
         if (camera.y > GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT))
             camera.y = GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT);
 
+        if (timer == 60)
+        {
+            icicle_spawn();
+            timer = 0;
+        }
+        else
+        {
+            timer++;
+        }
+
+        icicle_update_state_all();
+
         // Render cave and player
         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
         SDL_RenderClear(renderer);
         renderCave(renderer, camera.x, camera.y);
         renderFloor(renderer, floorTexture, camera.x);
+        icicle_render_all(icicleTexture, renderer, camera.x);
         SDL_Rect player_rect = {player.rect.x - camera.x, player.rect.y, player.rect.w, player.rect.h};
         SDL_RenderCopy(renderer, playerTexture, NULL, &player_rect);
         SDL_RenderPresent(renderer);
@@ -256,6 +272,7 @@ int main(int argc, char *argv[])
 
     // Cleanup
     SDL_DestroyTexture(playerTexture);
+    SDL_DestroyTexture(icicleTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
