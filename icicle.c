@@ -51,6 +51,7 @@ void icicle_spawn()
     {
         if (!ICICLES[i].is_falling)
             ICICLES[i] = icicle;
+        break;
     }
 }
 

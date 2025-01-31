@@ -20,7 +20,8 @@ typedef struct camera
 } camera_t;
 
 // Load texture function
-SDL_Texture *loadTexture(const char *path, SDL_Renderer *renderer)
+SDL_Texture *
+loadTexture(const char *path, SDL_Renderer *renderer)
 {
     SDL_Texture *texture = IMG_LoadTexture(renderer, path);
     if (!texture)
@@ -159,16 +160,41 @@ void renderFloor(SDL_Renderer *renderer, SDL_Texture *floorTexture, int camX)
     SDL_RenderCopy(renderer, floorTexture, &srcRect, &destRect);
 }
 
-int check_collisions(player_t player)
+void render_health_bar(SDL_Renderer *renderer, player_t *player, int camera_x)
+{
+    int bar_width = 50; // Set a fixed width
+    int bar_height = 10;
+    int bar_x = player->rect.x - camera_x;
+    int bar_y = player->rect.y - 15; // Position above entity
+
+    // Calculate health percentage
+    float health_ratio = (float)player->health / player->max_health;
+    int green_width = (int)(bar_width * health_ratio);
+
+    // Draw red background (empty health)
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_Rect health_bg = {bar_x, bar_y, bar_width, bar_height};
+    SDL_RenderFillRect(renderer, &health_bg);
+
+    // Draw green foreground (remaining health)
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_Rect health_fg = {bar_x, bar_y, green_width, bar_height};
+    SDL_RenderFillRect(renderer, &health_fg);
+}
+
+void check_collisions(player_t *player)
 {
     for (int i = 0; i < 100; i++)
     {
-        if (!ICICLES[i].is_falling)
-            continue;
-        if (SDL_HasIntersection(&(player.rect), &(ICICLES[i].rect)))
-            return -1;
+        if (ICICLES[i].is_falling)
+        {
+            if (SDL_HasIntersection(&(player->rect), &(ICICLES[i].rect)))
+            {
+                ICICLES[i].is_falling = 0;
+                player->health -= ICICLES[i].mass;
+            }
+        }
     }
-    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -213,7 +239,7 @@ int main(int argc, char *argv[])
     SDL_Texture *floorTexture = generateNoiseFloor(renderer);
 
     // Initialize player
-    player_t player = {.rect = {100, GROUND_LEVEL, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -8, .is_jumping = 0};
+    player_t player = {.rect = {100, GROUND_LEVEL, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -8, .is_jumping = 0, .health = 100, .max_health = 100};
 
     // Main game loop
     int running = 1;
@@ -260,7 +286,7 @@ int main(int argc, char *argv[])
         if (camera.y > GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT))
             camera.y = GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT);
 
-        if (timer >= 2)
+        if (timer >= 60)
         {
             icicle_spawn();
             timer = 0;
@@ -271,7 +297,9 @@ int main(int argc, char *argv[])
         }
 
         icicle_update_state_all();
-        if (check_collisions(player))
+        check_collisions(&player);
+
+        if (player.health <= 0)
             running = 0;
 
         // Render cave and player
@@ -282,6 +310,7 @@ int main(int argc, char *argv[])
         icicle_render_all(icicleTexture, renderer, camera.x);
         SDL_Rect player_rect = {player.rect.x - camera.x, player.rect.y, player.rect.w, player.rect.h};
         SDL_RenderCopy(renderer, playerTexture, NULL, &player_rect);
+        render_health_bar(renderer, &player, camera.x);
         SDL_RenderPresent(renderer);
         SDL_Delay(16); // ~60 FPS
     }

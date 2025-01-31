@@ -11,6 +11,8 @@ typedef struct player
     float vel_y;
     float jump_str;
     int is_jumping;
+    int max_health;
+    int health;
 } player_t;
 
 void player_jump(player_t *player);
