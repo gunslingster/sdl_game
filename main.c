@@ -6,11 +6,11 @@
 #include "constants.h"
 #include "player.h"
 #include "icicle.h"
+#include "map.h"
 
 // Cave variables
 #define WALL '#'
 #define FLOOR '.'
-char cave[GRID_HEIGHT][GRID_WIDTH];
 extern icicle_t ICICLES[100];
 
 typedef struct camera
@@ -27,137 +27,6 @@ loadTexture(const char *path, SDL_Renderer *renderer)
     if (!texture)
         printf("Failed to load image: %s\n", IMG_GetError());
     return texture;
-}
-
-// Initialize cave grid randomly
-void initCave()
-{
-    srand(time(NULL));
-    for (int y = 0; y < GRID_HEIGHT; y++)
-    {
-        for (int x = 0; x < GRID_WIDTH; x++)
-        {
-            cave[y][x] = (rand() % 100 < 45) ? WALL : FLOOR;
-        }
-    }
-}
-
-// Count surrounding walls
-int countWalls(int x, int y)
-{
-    int count = 0;
-    for (int dy = -1; dy <= 1; dy++)
-    {
-        for (int dx = -1; dx <= 1; dx++)
-        {
-            int nx = x + dx, ny = y + dy;
-            if (nx < 0 || nx >= GRID_WIDTH || ny < 0 || ny >= GRID_HEIGHT)
-            {
-                count++; // Treat out-of-bounds as wall
-            }
-            else if (cave[ny][nx] == WALL)
-            {
-                count++;
-            }
-        }
-    }
-    return count;
-}
-
-// Smooth cave using cellular automata
-void smoothCave()
-{
-    char newCave[GRID_HEIGHT][GRID_WIDTH];
-
-    for (int y = 0; y < GRID_HEIGHT; y++)
-    {
-        for (int x = 0; x < GRID_WIDTH; x++)
-        {
-            int walls = countWalls(x, y);
-            newCave[y][x] = (walls >= 5) ? WALL : FLOOR;
-        }
-    }
-
-    memcpy(cave, newCave, sizeof(cave));
-}
-
-void renderCave(SDL_Renderer *renderer, int camX, int camY)
-{
-    // Convert camera position from pixels to tiles
-    int tileStartX = camX / TILE_SIZE;
-    int tileStartY = camY / TILE_SIZE;
-
-    for (int y = 0; y <= WIN_HEIGHT / TILE_SIZE; y++)
-    {
-        for (int x = 0; x <= WIN_WIDTH / TILE_SIZE; x++)
-        {
-            int worldX = tileStartX + x;
-            int worldY = tileStartY + y;
-
-            if (worldX < 0 || worldX >= GRID_WIDTH || worldY < 0 || worldY >= GRID_HEIGHT)
-                continue;
-
-            // Corrected tile positioning based on camera offset
-            SDL_Rect tile = {
-                x * TILE_SIZE - (camX % TILE_SIZE), // Adjust for smooth scrolling
-                y * TILE_SIZE - (camY % TILE_SIZE),
-                TILE_SIZE, TILE_SIZE};
-
-            SDL_SetRenderDrawColor(renderer, cave[worldY][worldX] == WALL ? 50 : 150, 50, 50, 255);
-            SDL_RenderFillRect(renderer, &tile);
-        }
-    }
-}
-
-SDL_Texture *generateNoiseFloor(SDL_Renderer *renderer)
-{
-    int floorWidth = GRID_WIDTH * TILE_SIZE; // Make it as wide as the entire world
-    int floorHeight = WIN_HEIGHT - GROUND_LEVEL;
-    SDL_Surface *surface = SDL_CreateRGBSurface(0, floorWidth, floorHeight, 32, 0, 0, 0, 0);
-    if (!surface)
-    {
-        printf("Failed to create surface: %s\n", SDL_GetError());
-        return NULL;
-    }
-
-    SDL_LockSurface(surface);
-    Uint32 *pixels = (Uint32 *)surface->pixels;
-
-    for (int y = 0; y < surface->h; y += TILE_SIZE)
-    {
-        for (int x = 0; x < surface->w; x += TILE_SIZE)
-        {
-            int color = rand() % 40 + 100; // Random shade variation
-            Uint32 pixelColor = SDL_MapRGB(surface->format, color, color / 2, color / 3);
-
-            for (int ty = 0; ty < TILE_SIZE; ty++)
-            {
-                for (int tx = 0; tx < TILE_SIZE; tx++)
-                {
-                    int px = (y + ty) * surface->w + (x + tx);
-                    if (px < surface->w * surface->h)
-                        pixels[px] = pixelColor;
-                }
-            }
-        }
-    }
-
-    SDL_UnlockSurface(surface);
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
-
-    if (!texture)
-        printf("Failed to create texture: %s\n", SDL_GetError());
-
-    return texture;
-}
-
-void renderFloor(SDL_Renderer *renderer, SDL_Texture *floorTexture, int camX)
-{
-    SDL_Rect srcRect = {camX, 0, WIN_WIDTH + TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL}; // Select part of the texture
-    SDL_Rect destRect = {0, GROUND_LEVEL + 50, WIN_WIDTH + TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL};
-
-    SDL_RenderCopy(renderer, floorTexture, &srcRect, &destRect);
 }
 
 void render_health_bar(SDL_Renderer *renderer, player_t *player, int camera_x)
@@ -233,10 +102,10 @@ int main(int argc, char *argv[])
     SDL_Texture *icicleTexture = loadTexture("icicle.png", renderer);
 
     // Initialize cave
-    initCave();
+    cave_init();
     for (int i = 0; i < 5; i++)
-        smoothCave(); // 5 iterations for a smoother look
-    SDL_Texture *floorTexture = generateNoiseFloor(renderer);
+        cave_smooth(); // 5 iterations for a smoother look
+    SDL_Texture *floor_texture = floor_init(renderer);
 
     // Initialize player
     player_t player = {.rect = {100, GROUND_LEVEL, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -8, .is_jumping = 0, .health = 100, .max_health = 100};
@@ -305,8 +174,8 @@ int main(int argc, char *argv[])
         // Render cave and player
         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
         SDL_RenderClear(renderer);
-        renderCave(renderer, camera.x, camera.y);
-        renderFloor(renderer, floorTexture, camera.x);
+        cave_render(renderer, camera.x, camera.y);
+        floor_render(renderer, floor_texture, camera.x);
         icicle_render_all(icicleTexture, renderer, camera.x);
         SDL_Rect player_rect = {player.rect.x - camera.x, player.rect.y, player.rect.w, player.rect.h};
         SDL_RenderCopy(renderer, playerTexture, NULL, &player_rect);
