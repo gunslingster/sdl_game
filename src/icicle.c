@@ -46,12 +46,15 @@ void icicle_update_state_all()
 void icicle_spawn()
 {
     // Initialize an icicle with random x position, random size, and random mass
-    icicle_t icicle = {.rect = {rand() % (GRID_WIDTH * TILE_SIZE), 0, 50, 50}, .vel_y = 0, .mass = rand() % 10, .is_falling = 1};
+    icicle_t icicle = {.rect = {rand() % (GRID_WIDTH * TILE_SIZE), 0, 50, 50}, .vel_y = 0, .mass = 10, .is_falling = 1};
     for (int i = 0; i < 100; i++)
     {
         if (!ICICLES[i].is_falling)
+        {
+
             ICICLES[i] = icicle;
-        break;
+            break;
+        }
     }
 }
 

@@ -60,7 +60,7 @@ void check_collisions(player_t *player)
             if (SDL_HasIntersection(&(player->rect), &(ICICLES[i].rect)))
             {
                 ICICLES[i].is_falling = 0;
-                player->health -= ICICLES[i].mass;
+                player->health -= 2 * ICICLES[i].mass;
             }
         }
     }
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
         if (camera.y > GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT))
             camera.y = GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT);
 
-        if (timer >= 60)
+        if (timer >= 2)
         {
             icicle_spawn();
             timer = 0;
