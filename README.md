@@ -8,17 +8,27 @@ To install SDL2 and required dependencies, run:
 sudo apt install libsdl2-2.0-0
 sudo apt install libsdl2-dev
 sudo apt install libsdl2-image-dev
+sudo apt install make
 ```
 
 ## Compilation
-Compile the game using **gcc**:
+**gcc** defined as compiler in Makefile. To compile use command:
 ```sh
-gcc -o main main.c -lSDL2 -lSDL2_image
+make
 ```
 
 ## Running the Game
-To run the compiled game, execute:
+To run the compiled game use command:
 ```sh
-./main
+make run
+```
+## Clean
+Delete all compiled files, (object & executable) command:
+```sh
+make clean
 ```
 
+##File Structure
+./build contains main executable
+./src contains all .c .o .h files
+./assets contains all images, sounds, media, etc.
