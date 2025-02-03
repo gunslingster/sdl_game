@@ -28,7 +28,7 @@ Delete all compiled files, (object & executable) command:
 make clean
 ```
 
-##File Structure
+## File Structure
 ./build contains main executable
 ./src contains all .c .o .h files
 ./assets contains all images, sounds, media, etc.
