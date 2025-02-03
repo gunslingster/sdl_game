@@ -29,6 +29,8 @@ make clean
 ```
 
 ## File Structure
+```sh
 ./build contains main executable
 ./src contains all .c .o .h files
 ./assets contains all images, sounds, media, etc.
+```
