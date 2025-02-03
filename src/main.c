@@ -98,8 +98,8 @@ int main(int argc, char *argv[])
 
     // Initialize SDL_image
     IMG_Init(IMG_INIT_PNG);
-    SDL_Texture *playerTexture = loadTexture("caveman.png", renderer);
-    SDL_Texture *icicleTexture = loadTexture("icicle.png", renderer);
+    SDL_Texture *playerTexture = loadTexture("assets/images/caveman.png", renderer);
+    SDL_Texture *icicleTexture = loadTexture("assets/images/icicle.png", renderer);
 
     // Initialize cave
     cave_init();
