@@ -98,7 +98,6 @@ int main(int argc, char *argv[])
 
     // Initialize SDL_image
     IMG_Init(IMG_INIT_PNG);
-    SDL_Texture *playerTexture = loadTexture("assets/images/caveman.png", renderer);
     SDL_Texture *icicleTexture = loadTexture("assets/images/icicle.png", renderer);
 
     // Initialize cave
@@ -108,7 +107,9 @@ int main(int argc, char *argv[])
     SDL_Texture *floor_texture = floor_init(renderer);
 
     // Initialize player
-    player_t player = {.rect = {100, GROUND_LEVEL, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -8, .is_jumping = 0, .health = 100, .max_health = 100};
+    player_t player = {.rect = {100, GROUND_LEVEL, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -8, .is_jumping = 0, .health = 100, .max_health = 100, .movement = RIGHT};
+    player.texture_left = loadTexture("assets/images/caveman_left.png", renderer);
+    player.texture_right = loadTexture("assets/images/caveman_right.png", renderer);
 
     // Main game loop
     int running = 1;
@@ -177,15 +178,13 @@ int main(int argc, char *argv[])
         cave_render(renderer, camera.x, camera.y);
         floor_render(renderer, floor_texture, camera.x);
         icicle_render_all(icicleTexture, renderer, camera.x);
-        SDL_Rect player_rect = {player.rect.x - camera.x, player.rect.y, player.rect.w, player.rect.h};
-        SDL_RenderCopy(renderer, playerTexture, NULL, &player_rect);
+        player_render(renderer, player, camera.x);
         render_health_bar(renderer, &player, camera.x);
         SDL_RenderPresent(renderer);
         SDL_Delay(16); // ~60 FPS
     }
 
     // Cleanup
-    SDL_DestroyTexture(playerTexture);
     SDL_DestroyTexture(icicleTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
