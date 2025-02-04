@@ -8,9 +8,6 @@
 #include "icicle.h"
 #include "map.h"
 
-// Cave variables
-#define WALL '#'
-#define FLOOR '.'
 extern icicle_t ICICLES[100];
 
 typedef struct camera
