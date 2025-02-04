@@ -118,16 +118,34 @@ int main(int argc, char *argv[])
     {
         while (SDL_PollEvent(&event))
         {
-            if (event.type == SDL_QUIT)
-                running = 0;
-            if (event.type == SDL_KEYDOWN)
-            {
-                if (event.key.keysym.sym == SDLK_ESCAPE)
+            // if (event.type == SDL_QUIT)
+            //     running = 0;
+            // if (event.type == SDL_KEYDOWN)
+            // {
+            //     if (event.key.keysym.sym == SDLK_ESCAPE)
+            //         running = 0;
+            //     if (event.key.keysym.sym == SDLK_w && !player.is_jumping)
+            //     {
+            //         player_jump(&player);
+            //     }
+            // }
+
+            //messin around, changed above to switch -_- Lol
+            switch(event.type){
+                case SDL_QUIT:
                     running = 0;
-                if (event.key.keysym.sym == SDLK_w && !player.is_jumping)
-                {
-                    player_jump(&player);
-                }
+                    break;
+                case SDL_KEYDOWN:
+
+                    if (event.key.keysym.sym == SDLK_ESCAPE)
+                        running = 0;
+                    if (event.key.keysym.sym == SDLK_w && !player.is_jumping)
+                    {
+                        player_jump(&player);
+                    }
+
+                    break;
+
             }
         }
 
