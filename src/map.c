@@ -3,8 +3,10 @@
 #include <time.h>
 #include "constants.h"
 #include "map.h"
+#include "platform.h"
 
 char cave[GRID_HEIGHT][GRID_WIDTH];
+extern PLATFORMS[100];
 
 // Initialize cave grid randomly
 void cave_init()
@@ -127,6 +129,8 @@ SDL_Texture *floor_init(SDL_Renderer *renderer)
         printf("Failed to create texture: %s\n", SDL_GetError());
 
     return texture;
+
+    // SDL_Rect floor = {0, GROUND_LEVEL, WIN_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL};
 }
 
 void floor_render(SDL_Renderer *renderer, SDL_Texture *floorTexture, int camX)

@@ -27,7 +27,7 @@ void platform_render_all(SDL_Renderer *renderer, int cam_x)
 {
     for (int i = 0; i < (sizeof(PLATFORMS) / sizeof(PLATFORMS[0])); i++)
     {
-        if (PLATFORMS[i].rect.x > 0 && PLATFORMS[i].rect.y > 0)
+        if (PLATFORMS[i].in_use)
         {
             platform_render(renderer, PLATFORMS[i], cam_x);
         }
@@ -36,12 +36,13 @@ void platform_render_all(SDL_Renderer *renderer, int cam_x)
 
 void platform_init(int w, int h, int x, int y, int vel_x, int vel_y, SDL_Texture *platform_texture)
 {
-    platform_t platform = {.rect = {.w = w, .h = h, .x = x, .y = y}, .vel_x = vel_x, .vel_y = vel_y, .platform_texture = platform_texture};
+    platform_t platform = {.rect = {.w = w, .h = h, .x = x, .y = y}, .vel_x = vel_x, .vel_y = vel_y, .platform_texture = platform_texture, .in_use = 1};
     for (int i = 0; i < (sizeof(PLATFORMS) / sizeof(PLATFORMS[0])); i++)
     {
-        if (PLATFORMS[i].rect.x <= 0 && PLATFORMS[i].rect.y <= 0)
+        if (!PLATFORMS[i].in_use)
         {
             PLATFORMS[i] = platform;
+            break;
         }
     }
 }

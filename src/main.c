@@ -64,21 +64,31 @@ void check_collisions(player_t *player)
         }
     }
 
-    // for (int i = 0; i < (sizeof(PLATFORMS) / sizeof(PLATFORMS[0])); i++)
-    // {
-    //     if (!SDL_HasIntersection(&(player->rect), &(PLATFORMS[i].rect)))
-    //         continue;
-    //     // Handle player above platform
-    //     if (player->rect.y >= PLATFORMS[i].rect.y + player->rect.h)
-    //     {
-    //         if (player->is_jumping)
-    //         {
-    //             player->is_jumping = 0;
-    //             player->vel_y = 0;
-    //         }
-    //         player->rect.y = PLATFORMS[i].rect.y - player->rect.h;
-    //     }
-    // }
+    for (int i = 0; i < (sizeof(PLATFORMS) / sizeof(PLATFORMS[0])); i++)
+    {
+        if (!SDL_HasIntersection(&(player->rect), &(PLATFORMS[i].rect)))
+            continue;
+        // Handle platform collision from side
+        if (player->rect.x < PLATFORMS[i].rect.x && (player->rect.x + player->rect.w) >= PLATFORMS[i].rect.x)
+        {
+            player->rect.x = PLATFORMS[i].rect.x - player->rect.w;
+        }
+        if (player->rect.x < PLATFORMS[i].rect.x + PLATFORMS[i].rect.w && (player->rect.x + player->rect.w) > PLATFORMS[i].rect.x + PLATFORMS[i].rect.w)
+        {
+            player->rect.x = PLATFORMS[i].rect.x + PLATFORMS[i].rect.w;
+        }
+        // Handle player above platform
+        if ((player->rect.y + player->rect.h) >= PLATFORMS[i].rect.y && (player->rect.y - player->rect.h) < PLATFORMS[i].rect.y)
+        {
+            if (player->is_jumping)
+            {
+                player->is_jumping = 0;
+                player->vel_y = 0;
+                player->rect.y = PLATFORMS[i].rect.y - player->rect.h;
+            }
+            player->rect.y = PLATFORMS[i].rect.y - player->rect.h;
+        }
+    }
 }
 
 int main(int argc, char *argv[])
@@ -119,15 +129,17 @@ int main(int argc, char *argv[])
     for (int i = 0; i < 5; i++)
         cave_smooth(); // 5 iterations for a smoother look
     SDL_Texture *floor_texture = floor_init(renderer);
+    SDL_Rect floor = {0, GROUND_LEVEL, WIN_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL};
+    platform_init(GRID_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL, 0, GROUND_LEVEL, 0, 0, floor_texture);
 
     // Initialize player
-    player_t player = {.rect = {100, GROUND_LEVEL, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .is_jumping = 0, .health = 100, .max_health = 100, .movement = RIGHT};
+    player_t player = {.rect = {100, GROUND_LEVEL - player.rect.h, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .is_jumping = 0, .health = 100, .max_health = 100, .movement = RIGHT};
     player.texture_left = loadTexture("assets/images/caveman_left.png", renderer);
     player.texture_right = loadTexture("assets/images/caveman_right.png", renderer);
 
     // Initialize platforms
     SDL_Texture *platform_texture = loadTexture("assets/images/2dplatform.png", renderer);
-    platform_init(150, 50, 200, 480, 0, 0, platform_texture);
+    platform_init(150, 50, 200, 430, 0, 0, platform_texture);
 
     // Main game loop
     int running = 1;
@@ -212,7 +224,7 @@ int main(int argc, char *argv[])
         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
         SDL_RenderClear(renderer);
         cave_render(renderer, camera.x, camera.y);
-        floor_render(renderer, floor_texture, camera.x);
+        // floor_render(renderer, floor_texture, camera.x);
         platform_render_all(renderer, camera.x);
         icicle_render_all(icicleTexture, renderer, camera.x);
         player_render(renderer, player, camera.x);

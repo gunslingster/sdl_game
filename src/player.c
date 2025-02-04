@@ -30,13 +30,13 @@ void player_update_state(player_t *player)
     player->vel_y += GRAVITY;
     player->rect.y += player->vel_y;
 
-    // Ground collision
-    if (player->rect.y >= GROUND_LEVEL)
-    {
-        player->rect.y = GROUND_LEVEL;
-        player->vel_y = 0;
-        player->is_jumping = 0;
-    }
+    // // Ground collision
+    // if (player->rect.y >= GROUND_LEVEL)
+    // {
+    //     player->rect.y = GROUND_LEVEL;
+    //     player->vel_y = 0;
+    //     player->is_jumping = 0;
+    // }
 
     // Screen boundaries
     if (player->rect.x <= 0)

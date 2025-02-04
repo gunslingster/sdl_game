@@ -10,6 +10,7 @@ typedef struct platform
     float vel_x;
     float vel_y;
     SDL_Texture *platform_texture;
+    int in_use;
 } platform_t;
 
 void platform_update_state(platform_t *platform);
