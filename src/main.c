@@ -7,8 +7,10 @@
 #include "player.h"
 #include "icicle.h"
 #include "map.h"
+#include "platform.h"
 
 extern icicle_t ICICLES[100];
+extern platform_t PLATFORMS[100];
 
 typedef struct camera
 {
@@ -61,6 +63,22 @@ void check_collisions(player_t *player)
             }
         }
     }
+
+    // for (int i = 0; i < (sizeof(PLATFORMS) / sizeof(PLATFORMS[0])); i++)
+    // {
+    //     if (!SDL_HasIntersection(&(player->rect), &(PLATFORMS[i].rect)))
+    //         continue;
+    //     // Handle player above platform
+    //     if (player->rect.y >= PLATFORMS[i].rect.y + player->rect.h)
+    //     {
+    //         if (player->is_jumping)
+    //         {
+    //             player->is_jumping = 0;
+    //             player->vel_y = 0;
+    //         }
+    //         player->rect.y = PLATFORMS[i].rect.y - player->rect.h;
+    //     }
+    // }
 }
 
 int main(int argc, char *argv[])
@@ -76,7 +94,6 @@ int main(int argc, char *argv[])
     SDL_Window *window = SDL_CreateWindow("SDL2 Game Window",
                                           SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                           WIN_WIDTH, WIN_HEIGHT, SDL_WINDOW_SHOWN);
-    SDL_SetWindowSize(window, WIN_WIDTH, WIN_HEIGHT);
     if (!window)
     {
         fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
@@ -104,9 +121,13 @@ int main(int argc, char *argv[])
     SDL_Texture *floor_texture = floor_init(renderer);
 
     // Initialize player
-    player_t player = {.rect = {100, GROUND_LEVEL, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -8, .is_jumping = 0, .health = 100, .max_health = 100, .movement = RIGHT};
+    player_t player = {.rect = {100, GROUND_LEVEL, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .is_jumping = 0, .health = 100, .max_health = 100, .movement = RIGHT};
     player.texture_left = loadTexture("assets/images/caveman_left.png", renderer);
     player.texture_right = loadTexture("assets/images/caveman_right.png", renderer);
+
+    // Initialize platforms
+    SDL_Texture *platform_texture = loadTexture("assets/images/2dplatform.png", renderer);
+    platform_init(150, 50, 200, 480, 0, 0, platform_texture);
 
     // Main game loop
     int running = 1;
@@ -130,22 +151,22 @@ int main(int argc, char *argv[])
             //     }
             // }
 
-            //messin around, changed above to switch -_- Lol
-            switch(event.type){
-                case SDL_QUIT:
+            // messin around, changed above to switch -_- Lol
+            switch (event.type)
+            {
+            case SDL_QUIT:
+                running = 0;
+                break;
+            case SDL_KEYDOWN:
+
+                if (event.key.keysym.sym == SDLK_ESCAPE)
                     running = 0;
-                    break;
-                case SDL_KEYDOWN:
+                if (event.key.keysym.sym == SDLK_w && !player.is_jumping)
+                {
+                    player_jump(&player);
+                }
 
-                    if (event.key.keysym.sym == SDLK_ESCAPE)
-                        running = 0;
-                    if (event.key.keysym.sym == SDLK_w && !player.is_jumping)
-                    {
-                        player_jump(&player);
-                    }
-
-                    break;
-
+                break;
             }
         }
 
@@ -192,6 +213,7 @@ int main(int argc, char *argv[])
         SDL_RenderClear(renderer);
         cave_render(renderer, camera.x, camera.y);
         floor_render(renderer, floor_texture, camera.x);
+        platform_render_all(renderer, camera.x);
         icicle_render_all(icicleTexture, renderer, camera.x);
         player_render(renderer, player, camera.x);
         render_health_bar(renderer, &player, camera.x);
