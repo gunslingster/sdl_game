@@ -120,10 +120,11 @@ int main(int argc, char *argv[])
     // Initialize SDL_image
     IMG_Init(IMG_INIT_PNG);
     SDL_Texture *icicleTexture = loadTexture("assets/images/icicle.png", renderer);
-    for (int i = 0; i < (sizeof(ICICLES) / sizeof(ICICLES[0])); i++)
-    {
-        ICICLES[i].texture = icicleTexture;
-    }
+    icicle_initialize_all(icicleTexture);
+
+    // Initialize all the platforms
+    SDL_Texture *platform_texture = loadTexture("assets/images/2dplatform.png", renderer);
+    platform_initialize_all(platform_texture);
 
     // Initialize cave
     cave_init();
@@ -131,16 +132,15 @@ int main(int argc, char *argv[])
         cave_smooth(); // 5 iterations for a smoother look
     SDL_Texture *floor_texture = floor_init(renderer);
     SDL_Rect floor = {0, GROUND_LEVEL, WIN_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL};
-    platform_init(GRID_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL, 0, GROUND_LEVEL, 0, 0, floor_texture);
+    platform_spawn(0, GROUND_LEVEL, GRID_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL, 0, 0, 1, floor_texture);
 
     // Initialize player
     player_t player = {.type = TYPE_PLAYER, .rect = {100, GROUND_LEVEL - player.rect.h, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .is_jumping = 0, .health = 100, .max_health = 100, .movement = RIGHT, .update = player_update, .jump = player_jump, .render = player_render, .move = player_move};
     player.texture_left = loadTexture("assets/images/caveman_left.png", renderer);
     player.texture_right = loadTexture("assets/images/caveman_right.png", renderer);
 
-    // Initialize platforms
-    SDL_Texture *platform_texture = loadTexture("assets/images/2dplatform.png", renderer);
-    platform_init(150, 50, 200, 430, 0, 0, platform_texture);
+    // Add a random platform for now
+    platform_spawn(200, 430, 150, 50, 0, 0, 1, platform_texture);
 
     // Main game loop
     int running = 1;
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
             timer++;
         }
 
-        icicle_update_state_all();
+        icicle_update_all();
         check_collisions(&player);
 
         if (player.health <= 0)
@@ -221,8 +221,7 @@ int main(int argc, char *argv[])
         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
         SDL_RenderClear(renderer);
         cave_render(renderer, CAMERA.x, CAMERA.y);
-        // floor_render(renderer, floor_texture, CAMERA.x);
-        platform_render_all(renderer, CAMERA.x);
+        platform_render_all(renderer, CAMERA);
         icicle_render_all(renderer, CAMERA);
         player_render(renderer, player, CAMERA);
         render_health_bar(renderer, &player, CAMERA);

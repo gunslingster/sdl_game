@@ -36,7 +36,7 @@ exit:
     return;
 }
 
-void icicle_update_state_all()
+void icicle_update_all()
 {
     for (int i = 0; i < 100; i++)
     {
@@ -45,9 +45,9 @@ void icicle_update_state_all()
     }
 }
 
-void icicle_initialize(icicle_t *self, int x, int y, int w, int h, int vel_y, int mass, int is_falling)
+void icicle_initialize(icicle_t *self, int x, int y, int w, int h, int vel_y, int mass, int is_falling, SDL_Texture *texture)
 {
-    icicle_t icicle = {.rect = {x, y, w, h}, .vel_y = vel_y, .mass = mass, .is_falling = is_falling, .update = icicle_update, .render = icicle_render};
+    self->type = TYPE_ICICLE;
     self->rect.x = x;
     self->rect.y = y;
     self->rect.w = w;
@@ -56,7 +56,16 @@ void icicle_initialize(icicle_t *self, int x, int y, int w, int h, int vel_y, in
     self->mass = mass;
     self->is_falling = is_falling;
     self->update = icicle_update;
+    self->texture = texture;
     self->render = icicle_render;
+}
+
+void icicle_initialize_all(SDL_Texture *init_texture)
+{
+    for (int i = 0; i < (sizeof(ICICLES) / sizeof(ICICLES[0])); i++)
+    {
+        icicle_initialize(&ICICLES[i], 0, 0, 50, 50, 0, 10, 0, init_texture);
+    }
 }
 
 void icicle_spawn()
@@ -66,8 +75,13 @@ void icicle_spawn()
     {
         if (!ICICLES[i].is_falling)
         {
-
-            icicle_initialize(&ICICLES[i], (rand() % (GRID_WIDTH * TILE_SIZE)), 0, 50, 50, 0, 10, 1);
+            ICICLES[i].rect.x = rand() % (GRID_WIDTH * TILE_SIZE);
+            ICICLES[i].rect.y = 0;
+            ICICLES[i].rect.w = 50;
+            ICICLES[i].rect.h = 50;
+            ICICLES[i].vel_y = 0;
+            ICICLES[i].mass = 10;
+            ICICLES[i].is_falling = 1;
             break;
         }
     }
