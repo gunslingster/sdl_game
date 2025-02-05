@@ -9,6 +9,7 @@ sudo apt install libsdl2-2.0-0
 sudo apt install libsdl2-dev
 sudo apt install libsdl2-image-dev
 sudo apt install make
+sudo apt-get install libsdl2-ttf-dev
 ```
 
 ## Compilation
