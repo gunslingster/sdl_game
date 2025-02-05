@@ -1,6 +1,8 @@
 #include "player.h"
 #include "constants.h"
 
+player_t PLAYER = {0};
+
 void player_jump(player_t *self)
 {
     if (!self->is_jumping)

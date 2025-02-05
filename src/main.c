@@ -15,6 +15,7 @@
 extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
 extern camera_t CAMERA;
+extern player_t PLAYER;
 
 void render_health_bar(SDL_Renderer *renderer, player_t *player, camera_t camera)
 {
@@ -138,6 +139,7 @@ int main(int argc, char *argv[])
     player_t player = {.type = TYPE_PLAYER, .rect = {100, GROUND_LEVEL - player.rect.h, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .is_jumping = 0, .health = 100, .max_health = 100, .movement = RIGHT, .update = player_update, .jump = player_jump, .render = player_render, .move = player_move};
     player.texture_left = loadTexture("assets/images/caveman_left.png", renderer);
     player.texture_right = loadTexture("assets/images/caveman_right.png", renderer);
+    PLAYER = player;
 
     // Add a random platform for now
     platform_spawn(200, 430, 150, 50, 0, 0, 1, platform_texture);
@@ -168,9 +170,9 @@ int main(int argc, char *argv[])
 
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     running = 0;
-                if (event.key.keysym.sym == SDLK_w && !player.is_jumping)
+                if (event.key.keysym.sym == SDLK_w && !PLAYER.is_jumping)
                 {
-                    player.jump(&player);
+                    PLAYER.jump(&PLAYER);
                 }
 
                 break;
@@ -183,13 +185,13 @@ int main(int argc, char *argv[])
 
         // Movement controls
         const Uint8 *keys = SDL_GetKeyboardState(NULL);
-        player.move(&player, keys);
+        PLAYER.move(&PLAYER, keys);
 
         // Update player state
-        player.update(&player);
+        PLAYER.update(&PLAYER);
 
-        CAMERA.x = player.rect.x - (CAMERA.w / 2);
-        // camera.y = player.rect.y - (camera.h / 2);
+        CAMERA.x = PLAYER.rect.x - (CAMERA.w / 2);
+        // camera.y = PLAYER.rect.y - (camera.h / 2);
 
         // Clamp camera within bounds
         if (CAMERA.x < 0)
@@ -212,9 +214,9 @@ int main(int argc, char *argv[])
         }
 
         icicle_update_all();
-        check_collisions(&player);
+        check_collisions(&PLAYER);
 
-        if (player.health <= 0)
+        if (PLAYER.health <= 0)
             running = 0;
 
         // Render cave and player
@@ -223,8 +225,8 @@ int main(int argc, char *argv[])
         cave_render(renderer, CAMERA.x, CAMERA.y);
         platform_render_all(renderer, CAMERA);
         icicle_render_all(renderer, CAMERA);
-        player_render(renderer, player, CAMERA);
-        render_health_bar(renderer, &player, CAMERA);
+        player_render(renderer, PLAYER, CAMERA);
+        render_health_bar(renderer, &PLAYER, CAMERA);
         // Render time text
         renderText(renderer, font, time_text, 20, 20);
         SDL_RenderPresent(renderer);
