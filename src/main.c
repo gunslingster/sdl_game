@@ -9,31 +9,18 @@
 #include "icicle.h"
 #include "map.h"
 #include "platform.h"
+#include "camera.h"
+#include "utils.h"
 
 extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
+extern camera_t CAMERA;
 
-typedef struct camera
-{
-    int x, y;
-    int w, h;
-} camera_t;
-
-// Load texture function
-SDL_Texture *
-loadTexture(const char *path, SDL_Renderer *renderer)
-{
-    SDL_Texture *texture = IMG_LoadTexture(renderer, path);
-    if (!texture)
-        printf("Failed to load image: %s\n", IMG_GetError());
-    return texture;
-}
-
-void render_health_bar(SDL_Renderer *renderer, player_t *player, int camera_x)
+void render_health_bar(SDL_Renderer *renderer, player_t *player, camera_t camera)
 {
     int bar_width = 50; // Set a fixed width
     int bar_height = 10;
-    int bar_x = player->rect.x - camera_x;
+    int bar_x = player->rect.x - camera.x;
     int bar_y = player->rect.y - 15; // Position above entity
 
     // Calculate health percentage
@@ -104,7 +91,8 @@ int main(int argc, char *argv[])
     TTF_Init();
 
     TTF_Font *font = TTF_OpenFont("./assets/text/Oswald-VariableFont.ttf", 24);
-    if (!font) {
+    if (!font)
+    {
         printf("TTF_OpenFont error: %s\n", TTF_GetError());
         return 2;
     }
@@ -132,6 +120,10 @@ int main(int argc, char *argv[])
     // Initialize SDL_image
     IMG_Init(IMG_INIT_PNG);
     SDL_Texture *icicleTexture = loadTexture("assets/images/icicle.png", renderer);
+    for (int i = 0; i < (sizeof(ICICLES) / sizeof(ICICLES[0])); i++)
+    {
+        ICICLES[i].texture = icicleTexture;
+    }
 
     // Initialize cave
     cave_init();
@@ -142,7 +134,7 @@ int main(int argc, char *argv[])
     platform_init(GRID_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL, 0, GROUND_LEVEL, 0, 0, floor_texture);
 
     // Initialize player
-    player_t player = {.rect = {100, GROUND_LEVEL - player.rect.h, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .is_jumping = 0, .health = 100, .max_health = 100, .movement = RIGHT};
+    player_t player = {.type = TYPE_PLAYER, .rect = {100, GROUND_LEVEL - player.rect.h, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .is_jumping = 0, .health = 100, .max_health = 100, .movement = RIGHT, .update = player_update, .jump = player_jump, .render = player_render, .move = player_move};
     player.texture_left = loadTexture("assets/images/caveman_left.png", renderer);
     player.texture_right = loadTexture("assets/images/caveman_right.png", renderer);
 
@@ -153,17 +145,16 @@ int main(int argc, char *argv[])
     // Main game loop
     int running = 1;
     SDL_Event event;
-    camera_t camera = {0, 0, WIN_WIDTH, WIN_HEIGHT};
     int timer = 0;
 
-    //Get the number of milliseconds since SDL library initialization.
+    // Get the number of milliseconds since SDL library initialization.
     Uint64 start_time = SDL_GetTicks64();
 
     while (running)
     {
         Uint64 curr_time = SDL_GetTicks64();
-        //elapsed time in seconds
-        Uint64 elapsed_time = (curr_time - start_time)/1000;
+        // elapsed time in seconds
+        Uint64 elapsed_time = (curr_time - start_time) / 1000;
 
         while (SDL_PollEvent(&event))
         {
@@ -179,7 +170,7 @@ int main(int argc, char *argv[])
                     running = 0;
                 if (event.key.keysym.sym == SDLK_w && !player.is_jumping)
                 {
-                    player_jump(&player);
+                    player.jump(&player);
                 }
 
                 break;
@@ -192,25 +183,23 @@ int main(int argc, char *argv[])
 
         // Movement controls
         const Uint8 *keys = SDL_GetKeyboardState(NULL);
-        player_move(&player, keys);
+        player.move(&player, keys);
 
         // Update player state
-        player_update_state(&player);
+        player.update(&player);
 
-        camera.x = player.rect.x - (camera.w / 2);
+        CAMERA.x = player.rect.x - (CAMERA.w / 2);
         // camera.y = player.rect.y - (camera.h / 2);
-        // printf("Player position: (%d, %d)\n", player.rect.x, player.rect.y);
-        // printf("Camera position: (%d, %d)\n", camera.x, camera.y);
 
         // Clamp camera within bounds
-        if (camera.x < 0)
-            camera.x = 0;
-        if (camera.y < 0)
-            camera.y = 0;
-        if (camera.x > GRID_WIDTH * TILE_SIZE - (WIN_WIDTH))
-            camera.x = GRID_WIDTH * TILE_SIZE - (WIN_WIDTH);
-        if (camera.y > GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT))
-            camera.y = GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT);
+        if (CAMERA.x < 0)
+            CAMERA.x = 0;
+        if (CAMERA.y < 0)
+            CAMERA.y = 0;
+        if (CAMERA.x > GRID_WIDTH * TILE_SIZE - (WIN_WIDTH))
+            CAMERA.x = GRID_WIDTH * TILE_SIZE - (WIN_WIDTH);
+        if (CAMERA.y > GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT))
+            CAMERA.y = GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT);
 
         if (timer >= 2)
         {
@@ -222,9 +211,6 @@ int main(int argc, char *argv[])
             timer++;
         }
 
-
-
-
         icicle_update_state_all();
         check_collisions(&player);
 
@@ -234,12 +220,12 @@ int main(int argc, char *argv[])
         // Render cave and player
         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
         SDL_RenderClear(renderer);
-        cave_render(renderer, camera.x, camera.y);
-        // floor_render(renderer, floor_texture, camera.x);
-        platform_render_all(renderer, camera.x);
-        icicle_render_all(icicleTexture, renderer, camera.x);
-        player_render(renderer, player, camera.x);
-        render_health_bar(renderer, &player, camera.x);
+        cave_render(renderer, CAMERA.x, CAMERA.y);
+        // floor_render(renderer, floor_texture, CAMERA.x);
+        platform_render_all(renderer, CAMERA.x);
+        icicle_render_all(renderer, CAMERA);
+        player_render(renderer, player, CAMERA);
+        render_health_bar(renderer, &player, CAMERA);
         // Render time text
         renderText(renderer, font, time_text, 20, 20);
         SDL_RenderPresent(renderer);

@@ -1,6 +1,13 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+typedef enum entity_type
+{
+    TYPE_PLAYER,
+    TYPE_ICICLE,
+    TYPE_PLATFORM,
+} entity_type_t;
+
 #define SPEED 3
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
