@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -100,6 +101,14 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    TTF_Init();
+
+    TTF_Font *font = TTF_OpenFont("./assets/text/Oswald-VariableFont.ttf", 24);
+    if (!font) {
+        printf("TTF_OpenFont error: %s\n", TTF_GetError());
+        return 2;
+    }
+
     // Create window and renderer
     SDL_Window *window = SDL_CreateWindow("SDL2 Game Window",
                                           SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -147,22 +156,17 @@ int main(int argc, char *argv[])
     camera_t camera = {0, 0, WIN_WIDTH, WIN_HEIGHT};
     int timer = 0;
 
+    //Get the number of milliseconds since SDL library initialization.
+    Uint64 start_time = SDL_GetTicks64();
+
     while (running)
     {
+        Uint64 curr_time = SDL_GetTicks64();
+        //elapsed time in seconds
+        Uint64 elapsed_time = (curr_time - start_time)/1000;
+
         while (SDL_PollEvent(&event))
         {
-            // if (event.type == SDL_QUIT)
-            //     running = 0;
-            // if (event.type == SDL_KEYDOWN)
-            // {
-            //     if (event.key.keysym.sym == SDLK_ESCAPE)
-            //         running = 0;
-            //     if (event.key.keysym.sym == SDLK_w && !player.is_jumping)
-            //     {
-            //         player_jump(&player);
-            //     }
-            // }
-
             // messin around, changed above to switch -_- Lol
             switch (event.type)
             {
@@ -181,6 +185,10 @@ int main(int argc, char *argv[])
                 break;
             }
         }
+
+        // Convert time to string, create new char array, snprintf puts elapsed time into time_text variable
+        char time_text[32];
+        snprintf(time_text, sizeof(time_text), "Time: %u", elapsed_time);
 
         // Movement controls
         const Uint8 *keys = SDL_GetKeyboardState(NULL);
@@ -214,6 +222,9 @@ int main(int argc, char *argv[])
             timer++;
         }
 
+
+
+
         icicle_update_state_all();
         check_collisions(&player);
 
@@ -229,15 +240,19 @@ int main(int argc, char *argv[])
         icicle_render_all(icicleTexture, renderer, camera.x);
         player_render(renderer, player, camera.x);
         render_health_bar(renderer, &player, camera.x);
+        // Render time text
+        renderText(renderer, font, time_text, 20, 20);
         SDL_RenderPresent(renderer);
         SDL_Delay(16); // ~60 FPS
     }
 
     // Cleanup
+    TTF_CloseFont(font);
     SDL_DestroyTexture(icicleTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+    TTF_Quit();
     IMG_Quit();
 
     return 0;
