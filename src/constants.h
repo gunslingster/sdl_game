@@ -3,6 +3,7 @@
 
 typedef enum entity_type
 {
+    TYPE_NONE,
     TYPE_PLAYER,
     TYPE_ICICLE,
     TYPE_PLATFORM,
