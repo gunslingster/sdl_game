@@ -1,5 +1,6 @@
 #include "player.h"
 #include "constants.h"
+#include "collision.h"
 
 player_t PLAYER = {0};
 
@@ -24,6 +25,7 @@ void player_move(player_t *self, const Uint8 *keys)
         self->rect.x += self->vel_x;
         self->movement = RIGHT;
     }
+    collision_check();
 }
 
 void player_update(player_t *self)
@@ -42,6 +44,7 @@ void player_update(player_t *self)
         self->rect.y = 0;
     if (self->rect.y >= GRID_HEIGHT * TILE_SIZE - self->rect.w)
         self->rect.y = GRID_HEIGHT * TILE_SIZE - self->rect.w;
+    collision_check();
 }
 
 void player_render(SDL_Renderer *renderer, player_t self, camera_t camera)

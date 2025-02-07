@@ -18,6 +18,7 @@ typedef struct player
 {
     entity_type_t type;
     SDL_Rect rect;
+    SDL_Rect prev;
     float vel_x;
     float vel_y;
     float jump_str;

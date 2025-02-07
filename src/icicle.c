@@ -13,13 +13,13 @@ void icicle_update(icicle_t *self)
     self->vel_y += GRAVITY / 2;
     self->rect.y += self->vel_y;
 
-    // Ground collision
-    if (self->rect.y >= GROUND_LEVEL)
-    {
-        // self->rect.y = GROUND_LEVEL;
-        self->vel_y = 0;
-        self->is_falling = 0;
-    }
+    // // Ground collision
+    // if (self->rect.y >= GROUND_LEVEL)
+    // {
+    //     // self->rect.y = GROUND_LEVEL;
+    //     self->vel_y = 0;
+    //     self->is_falling = 0;
+    // }
 
     // Screen boundaries
     if (self->rect.x <= 0)

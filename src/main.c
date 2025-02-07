@@ -11,6 +11,7 @@
 #include "platform.h"
 #include "camera.h"
 #include "utils.h"
+#include "collision.h"
 
 extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
@@ -37,47 +38,6 @@ void render_health_bar(SDL_Renderer *renderer, player_t *player, camera_t camera
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
     SDL_Rect health_fg = {bar_x, bar_y, green_width, bar_height};
     SDL_RenderFillRect(renderer, &health_fg);
-}
-
-void check_collisions(player_t *player)
-{
-    for (int i = 0; i < 100; i++)
-    {
-        if (ICICLES[i].is_falling)
-        {
-            if (SDL_HasIntersection(&(player->rect), &(ICICLES[i].rect)))
-            {
-                ICICLES[i].is_falling = 0;
-                player->health -= 2 * ICICLES[i].mass;
-            }
-        }
-    }
-
-    for (int i = 0; i < (sizeof(PLATFORMS) / sizeof(PLATFORMS[0])); i++)
-    {
-        if (!SDL_HasIntersection(&(player->rect), &(PLATFORMS[i].rect)))
-            continue;
-        // Handle platform collision from side
-        if (player->rect.x < PLATFORMS[i].rect.x && (player->rect.x + player->rect.w) >= PLATFORMS[i].rect.x)
-        {
-            player->rect.x = PLATFORMS[i].rect.x - player->rect.w;
-        }
-        if (player->rect.x < PLATFORMS[i].rect.x + PLATFORMS[i].rect.w && (player->rect.x + player->rect.w) > PLATFORMS[i].rect.x + PLATFORMS[i].rect.w)
-        {
-            player->rect.x = PLATFORMS[i].rect.x + PLATFORMS[i].rect.w;
-        }
-        // Handle player above platform
-        if ((player->rect.y + player->rect.h) >= PLATFORMS[i].rect.y && (player->rect.y - player->rect.h) < PLATFORMS[i].rect.y)
-        {
-            if (player->is_jumping)
-            {
-                player->is_jumping = 0;
-                player->vel_y = 0;
-                player->rect.y = PLATFORMS[i].rect.y - player->rect.h;
-            }
-            player->rect.y = PLATFORMS[i].rect.y - player->rect.h;
-        }
-    }
 }
 
 int main(int argc, char *argv[])
@@ -140,6 +100,7 @@ int main(int argc, char *argv[])
     player.texture_left = loadTexture("assets/images/caveman_left.png", renderer);
     player.texture_right = loadTexture("assets/images/caveman_right.png", renderer);
     PLAYER = player;
+    PLAYER.rect.y = 400;
 
     // Add a random platform for now
     platform_spawn(200, 430, 150, 50, 0, 0, 1, platform_texture);
@@ -203,7 +164,7 @@ int main(int argc, char *argv[])
         if (CAMERA.y > GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT))
             CAMERA.y = GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT);
 
-        if (timer >= 2)
+        if (timer >= 10)
         {
             icicle_spawn();
             timer = 0;
@@ -214,7 +175,7 @@ int main(int argc, char *argv[])
         }
 
         icicle_update_all();
-        check_collisions(&PLAYER);
+        collision_check();
 
         if (PLAYER.health <= 0)
             running = 0;
