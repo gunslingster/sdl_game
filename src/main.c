@@ -40,36 +40,6 @@ void render_health_bar(SDL_Renderer *renderer, player_t *player, camera_t camera
     SDL_RenderFillRect(renderer, &health_fg);
 }
 
-void check_collisions(player_t *player)
-{
-    for (int i = 0; i < 100; i++)
-    {
-        if (!ICICLES[i].is_falling)
-            continue;
-        if (SDL_HasIntersection(&(player->rect), &(ICICLES[i].rect)))
-        {
-            collision_t collision = {.obj1 = (void *)player, .obj2 = (void *)&(ICICLES[i]), .type1 = player->type, .type2 = ICICLES[i].type};
-            collision_add(collision);
-        }
-        for (int j = 0; j < (sizeof(PLATFORMS) / sizeof(PLATFORMS[0])); j++)
-        {
-            if (SDL_HasIntersection(&(ICICLES[i].rect), &(PLATFORMS[j].rect)))
-            {
-                collision_t collision = {.obj1 = (void *)&(ICICLES[i]), .obj2 = (void *)&(PLATFORMS[j]), .type1 = TYPE_ICICLE, .type2 = TYPE_PLATFORM};
-                collision_add(collision);
-            }
-        }
-    }
-
-    for (int i = 0; i < (sizeof(PLATFORMS) / sizeof(PLATFORMS[0])); i++)
-    {
-        if (!SDL_HasIntersection(&(player->rect), &(PLATFORMS[i].rect)))
-            continue;
-        collision_t collision = {.obj1 = (void *)player, .obj2 = (void *)&(PLATFORMS[i]), .type1 = player->type, .type2 = PLATFORMS[i].type};
-        collision_add(collision);
-    }
-}
-
 int main(int argc, char *argv[])
 {
     // Initialize SDL
