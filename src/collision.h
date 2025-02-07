@@ -13,6 +13,8 @@ typedef struct collsion
     entity_type_t type2;
 } collision_t;
 
-void collision_process(collision_t collision);
+void collision_queue_process();
+void collision_check();
+void collision_add(collision_t collision);
 
 #endif
