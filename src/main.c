@@ -1,6 +1,6 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -45,7 +45,7 @@ void check_collisions(player_t *player)
     {
         if (ICICLES[i].is_falling)
         {
-            if (SDL_HasIntersection(&(player->rect), &(ICICLES[i].rect)))
+            if (SDL_HasRectIntersection(&(player->rect), &(ICICLES[i].rect)))
             {
                 ICICLES[i].is_falling = 0;
                 player->health -= 2 * ICICLES[i].mass;
@@ -55,7 +55,7 @@ void check_collisions(player_t *player)
 
     for (int i = 0; i < (sizeof(PLATFORMS) / sizeof(PLATFORMS[0])); i++)
     {
-        if (!SDL_HasIntersection(&(player->rect), &(PLATFORMS[i].rect)))
+        if (!SDL_HasRectIntersection(&(player->rect), &(PLATFORMS[i].rect)))
             continue;
         // Handle platform collision from side
         if (player->rect.x < PLATFORMS[i].rect.x && (player->rect.x + player->rect.w) >= PLATFORMS[i].rect.x)
@@ -83,7 +83,7 @@ void check_collisions(player_t *player)
 int main(int argc, char *argv[])
 {
     // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    if (!SDL_Init(SDL_INIT_VIDEO))
     {
         fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
         return 1;
@@ -92,16 +92,14 @@ int main(int argc, char *argv[])
     TTF_Init();
 
     TTF_Font *font = TTF_OpenFont("./assets/text/Oswald-VariableFont.ttf", 24);
-    if (!font)
-    {
-        printf("TTF_OpenFont error: %s\n", TTF_GetError());
-        return 2;
-    }
+    // if (!font)
+    // {
+    //     printf("TTF_OpenFont error: %s\n", TTF_GetError());
+    //     return 2;
+    // }
 
     // Create window and renderer
-    SDL_Window *window = SDL_CreateWindow("SDL2 Game Window",
-                                          SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                          WIN_WIDTH, WIN_HEIGHT, SDL_WINDOW_SHOWN);
+    SDL_Window *window = SDL_CreateWindow("SDL2 Game Window", WIN_WIDTH, WIN_HEIGHT, 0);
     if (!window)
     {
         fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
@@ -109,7 +107,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, NULL);
     if (!renderer)
     {
         fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
@@ -119,7 +117,7 @@ int main(int argc, char *argv[])
     }
 
     // Initialize SDL_image
-    IMG_Init(IMG_INIT_PNG);
+    // IMG_Init(IMG_INIT_PNG);
     SDL_Texture *icicleTexture = loadTexture("assets/images/icicle.png", renderer);
     icicle_initialize_all(icicleTexture);
 
@@ -150,11 +148,11 @@ int main(int argc, char *argv[])
     int timer = 0;
 
     // Get the number of milliseconds since SDL library initialization.
-    Uint64 start_time = SDL_GetTicks64();
+    Uint64 start_time = SDL_GetTicks();
 
     while (running)
     {
-        Uint64 curr_time = SDL_GetTicks64();
+        Uint64 curr_time = SDL_GetTicks();
         // elapsed time in seconds
         Uint64 elapsed_time = (curr_time - start_time) / 1000;
 
@@ -163,14 +161,14 @@ int main(int argc, char *argv[])
             // messin around, changed above to switch -_- Lol
             switch (event.type)
             {
-            case SDL_QUIT:
+            case SDL_EVENT_QUIT:
                 running = 0;
                 break;
-            case SDL_KEYDOWN:
+            case SDL_EVENT_KEY_DOWN:
 
-                if (event.key.keysym.sym == SDLK_ESCAPE)
+                if (event.key.key == SDLK_ESCAPE)
                     running = 0;
-                if (event.key.keysym.sym == SDLK_w && !PLAYER.is_jumping)
+                if (event.key.key == SDLK_W && !PLAYER.is_jumping)
                 {
                     PLAYER.jump(&PLAYER);
                 }
@@ -240,7 +238,7 @@ int main(int argc, char *argv[])
     SDL_DestroyWindow(window);
     SDL_Quit();
     TTF_Quit();
-    IMG_Quit();
+    // IMG_Quit();
 
     return 0;
 }

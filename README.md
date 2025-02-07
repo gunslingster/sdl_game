@@ -12,10 +12,17 @@ sudo apt install make
 sudo apt-get install libsdl2-ttf-dev
 ```
 
+For SDL3 additional libraries are needed. You also need to clone recursively with the --recursive flag.
+
 ## Compilation
 **gcc** defined as compiler in Makefile. To compile use command:
 ```sh
 make
+```
+
+For SDL 3 first cd into the build dir and run
+```sh
+cmake --build .
 ```
 
 ## Running the Game

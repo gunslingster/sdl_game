@@ -54,5 +54,5 @@ void player_render(SDL_Renderer *renderer, player_t self, camera_t camera)
         playerTexture = self.texture_left;
 
     SDL_Rect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
-    SDL_RenderCopy(renderer, playerTexture, NULL, &self_rect);
+    SDL_RenderTexture(renderer, playerTexture, NULL, &self_rect);
 }

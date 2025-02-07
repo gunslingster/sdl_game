@@ -22,7 +22,7 @@ void platform_update(platform_t *platform)
 void platform_render(SDL_Renderer *renderer, platform_t platform, int cam_x)
 {
     SDL_Rect platform_rect = {platform.rect.x - cam_x, platform.rect.y, platform.rect.w, platform.rect.h};
-    SDL_RenderCopy(renderer, platform.texture, NULL, &platform_rect);
+    SDL_RenderTexture(renderer, platform.texture, NULL, &platform_rect);
 }
 
 void platform_render_all(SDL_Renderer *renderer, camera_t camera)

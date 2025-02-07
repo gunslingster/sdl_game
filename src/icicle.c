@@ -96,7 +96,7 @@ void icicle_render(SDL_Renderer *renderer, icicle_t self, camera_t camera)
             self.rect.y,
             self.rect.w,
             self.rect.h};
-        SDL_RenderCopy(renderer, self.texture, NULL, &render_rect);
+        SDL_RenderTexture(renderer, self.texture, NULL, &render_rect);
     }
 }
 
