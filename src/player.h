@@ -5,14 +5,7 @@
 #include <SDL2/SDL_image.h>
 #include "camera.h"
 #include "constants.h"
-
-typedef enum Movement
-{
-    RIGHT,
-    LEFT,
-    JUMP,
-    CRAWL,
-} Movement;
+#include "utils.h"
 
 typedef struct player
 {
