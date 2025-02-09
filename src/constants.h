@@ -7,6 +7,7 @@ typedef enum entity_type
     TYPE_PLAYER,
     TYPE_ICICLE,
     TYPE_PLATFORM,
+    TYPE_ICEMAN,
 } entity_type_t;
 
 #define SPEED 3

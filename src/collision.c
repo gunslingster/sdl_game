@@ -1,12 +1,54 @@
 #include "collision.h"
 #include "player.h"
 #include "icicle.h"
+#include "enemies/iceman.h"
 #include "platform.h"
 
 static collision_t COLLISION_QUEUE[MAX_COLLISIONS] = {0};
 extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
+// extern iceman_t ICEMAN[MAX_ICEMAN];
 extern player_t PLAYER;
+
+static void collision_iceman_platform(iceman_t *iceman, platform_t *platform)
+{
+    int iceman_top = iceman->rect.y;
+    int iceman_bottom = iceman->rect.y + iceman->rect.h;
+    int iceman_left = iceman->rect.x;
+    int iceman_right = iceman->rect.x + iceman->rect.w;
+    int platform_top = platform->rect.y;
+    int platform_bottom = platform->rect.y + platform->rect.h;
+    int platform_left = platform->rect.x;
+    int platform_right = platform->rect.x + platform->rect.w;
+
+    // Collision from the top (iceman landing on the platform)
+    if (iceman_bottom >= platform_top && iceman_top < platform_top &&
+        iceman_right > platform_left && iceman_left < platform_right)
+    {
+        iceman->rect.y = platform_top - iceman->rect.h;
+        iceman->vel_y = 0;
+        iceman->is_jumping = 0;
+    }
+    // Collision from below (iceman hitting their head on the platform)
+    else if (iceman_top <= platform_bottom && iceman_bottom < platform_bottom &&
+             iceman_right > platform_left && iceman_left < platform_right)
+    {
+        iceman->rect.y = platform_bottom;
+        iceman->vel_y = -(iceman->vel_y); // Bounce effect
+    }
+    // Collision from the left (iceman hitting the right side of the platform)
+    else if (iceman_right >= platform_left && iceman_left < platform_left &&
+             iceman_bottom > platform_top && iceman_top < platform_bottom)
+    {
+        iceman->rect.x = platform_left - iceman->rect.w;
+    }
+    // Collision from the right (iceman hitting the left side of the platform)
+    else if (iceman_left <= platform_right && iceman_right > platform_right &&
+             iceman_bottom > platform_top && iceman_top < platform_bottom)
+    {
+        iceman->rect.x = platform_right;
+    }
+}
 
 static void collision_player_platform(player_t *player, platform_t *platform)
 {
@@ -70,6 +112,13 @@ static void collision_process(collision_t collision)
         platform_t *platform = (platform_t *)collision.obj2;
         collision_player_platform(player, platform);
     }
+
+    // else if (type1 == TYPE_ICEMAN && type2 == TYPE_PLATFORM)
+    // {
+    //     iceman_t *iceman = (iceman_t *)collision.obj1;
+    //     platform_t *platform = (platform_t *)collision.obj2;
+    //     collision_iceman_platform(iceman, platform);
+    // }
 
     else if (type1 == TYPE_PLAYER && type2 == TYPE_ICICLE)
     {
