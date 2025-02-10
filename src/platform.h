@@ -5,6 +5,7 @@
 #include <SDL2/SDL_image.h>
 #include "camera.h"
 #include "constants.h"
+#include "entity.h"
 
 typedef struct platform
 {

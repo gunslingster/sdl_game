@@ -12,13 +12,15 @@
 #include "camera.h"
 #include "utils.h"
 #include "collision.h"
+#include "keys.h"
+#include "enemies/iceman.h"
 
 extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
 extern camera_t CAMERA;
-extern player_t PLAYER;
+extern entity_t PLAYER;
 
-void render_health_bar(SDL_Renderer *renderer, player_t *player, camera_t camera)
+void render_health_bar(SDL_Renderer *renderer, entity_t *player, camera_t camera)
 {
     int bar_width = 50; // Set a fixed width
     int bar_height = 10;
@@ -96,11 +98,14 @@ int main(int argc, char *argv[])
     platform_spawn(0, GROUND_LEVEL, GRID_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL, 0, 0, 1, floor_texture);
 
     // Initialize player
-    player_t player = {.type = TYPE_PLAYER, .rect = {100, GROUND_LEVEL - player.rect.h, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .is_jumping = 0, .health = 100, .max_health = 100, .movement = RIGHT, .update = player_update, .jump = player_jump, .render = player_render, .move = player_move};
-    player.texture_left = loadTexture("assets/images/caveman_left.png", renderer);
-    player.texture_right = loadTexture("assets/images/caveman_right.png", renderer);
-    PLAYER = player;
-    PLAYER.rect.y = 400;
+    entity_t player = {.type = TYPE_PLAYER, .rect = {100, GROUND_LEVEL - 50 * 2, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .state = STATE_IDLE, .health = 100, .max_health = 100, .movement = RIGHT, .update = player_update, .jump = entity_jump, .render = player_render, .move = player_move, .is_active = 1};
+    player_spawn(player);
+    PLAYER.texture = loadTexture("assets/images/caveman_right.png", renderer);
+
+    // Add a random iceman for now
+    SDL_Texture *iceman_texture = loadTexture("assets/images/iceman_right.png", renderer);
+    iceman_initialize_all(iceman_texture);
+    iceman_spawn();
 
     // Add a random platform for now
     platform_spawn(200, 430, 150, 50, 0, 0, 1, platform_texture);
@@ -131,7 +136,7 @@ int main(int argc, char *argv[])
 
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     running = 0;
-                if (event.key.keysym.sym == SDLK_w && !PLAYER.is_jumping)
+                if (event.key.keysym.sym == SDLK_w && !(PLAYER.state == STATE_JUMPING))
                 {
                     PLAYER.jump(&PLAYER);
                 }
@@ -140,13 +145,14 @@ int main(int argc, char *argv[])
             }
         }
 
+        updateKeyboardState();
+
         // Convert time to string, create new char array, snprintf puts elapsed time into time_text variable
         char time_text[32];
         snprintf(time_text, sizeof(time_text), "Time: %u", elapsed_time);
 
         // Movement controls
-        const Uint8 *keys = SDL_GetKeyboardState(NULL);
-        PLAYER.move(&PLAYER, keys);
+        PLAYER.move(&PLAYER);
 
         // Update player state
         PLAYER.update(&PLAYER);
@@ -175,6 +181,7 @@ int main(int argc, char *argv[])
         }
 
         icicle_update_all();
+        iceman_update_all();
         collision_check();
 
         if (PLAYER.health <= 0)
@@ -186,7 +193,8 @@ int main(int argc, char *argv[])
         cave_render(renderer, CAMERA.x, CAMERA.y);
         platform_render_all(renderer, CAMERA);
         icicle_render_all(renderer, CAMERA);
-        player_render(renderer, PLAYER, CAMERA);
+        iceman_render_all(renderer, CAMERA);
+        PLAYER.render(renderer, PLAYER, CAMERA);
         render_health_bar(renderer, &PLAYER, CAMERA);
         // Render time text
         renderText(renderer, font, time_text, 20, 20);
