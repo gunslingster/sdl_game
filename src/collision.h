@@ -2,6 +2,7 @@
 #define COLLISION_H
 
 #include "constants.h"
+#include "entity.h"
 
 #define MAX_COLLISIONS 100
 

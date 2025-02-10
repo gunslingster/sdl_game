@@ -17,7 +17,7 @@ void iceman_jump(iceman_t *self)
     }
 }
 
-void iceman_update(iceman_t *self, player_t *player)
+void iceman_update(iceman_t *self, entity_t *player)
 {
     // Apply gravity and movement
     self->vel_y += GRAVITY;

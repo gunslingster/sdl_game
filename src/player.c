@@ -1,35 +1,51 @@
 #include "player.h"
 #include "constants.h"
 #include "collision.h"
+#include "entity.h"
+#include "keys.h"
 
-player_t PLAYER = {0};
+entity_t PLAYER = {0};
 
-void player_jump(player_t *self)
+void player_jump(entity_t *self)
 {
-    if (!self->is_jumping)
-    {
-        self->vel_y = self->jump_str;
-        self->is_jumping = 1;
-    }
+    if (!self->is_active)
+        return;
+
+    entity_jump(self);
 }
 
-void player_move(player_t *self, const Uint8 *keys)
+void player_move(entity_t *self)
 {
-    if (keys[SDL_SCANCODE_A])
+    if (!self->is_active)
+        return;
+
+    if (KEYS[SDL_SCANCODE_A])
     {
-        self->rect.x -= self->vel_x;
+        self->vel_x = -3 * SPEED;
         self->movement = LEFT;
+        if (!self->state == STATE_JUMPING)
+            self->state = STATE_WALKING;
     }
-    if (keys[SDL_SCANCODE_D])
+    else if (KEYS[SDL_SCANCODE_D])
     {
-        self->rect.x += self->vel_x;
+        self->vel_x = 3 * SPEED;
         self->movement = RIGHT;
+        if (!self->state == STATE_JUMPING)
+            self->state = STATE_WALKING;
     }
-    collision_check();
+    else
+    {
+        if (!self->state == STATE_JUMPING)
+            self->state = STATE_IDLE;
+        self->vel_x = 0;
+    }
 }
 
-void player_update(player_t *self)
+void player_update(entity_t *self)
 {
+    self->rect.x += self->vel_x;
+    collision_check();
+
     // Apply gravity and movement
     self->vel_y += GRAVITY;
     self->rect.y += self->vel_y;
@@ -47,15 +63,28 @@ void player_update(player_t *self)
     collision_check();
 }
 
-void player_render(SDL_Renderer *renderer, player_t self, camera_t camera)
+void player_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
 {
-    SDL_Texture *playerTexture;
+    if (!self.is_active)
+        return;
 
-    if (self.movement == RIGHT)
-        playerTexture = self.texture_right;
-    else
-        playerTexture = self.texture_left;
+    SDL_RendererFlip flip;
+
+    switch (self.movement)
+    {
+    case RIGHT:
+        flip = SDL_FLIP_NONE;
+        break;
+    case LEFT:
+        flip = SDL_FLIP_HORIZONTAL;
+        break;
+    }
 
     SDL_Rect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
-    SDL_RenderCopy(renderer, playerTexture, NULL, &self_rect);
+    SDL_RenderCopyEx(renderer, self.texture, NULL, &self_rect, 0, NULL, flip);
+}
+
+void player_spawn(entity_t player)
+{
+    PLAYER = player;
 }

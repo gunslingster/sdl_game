@@ -8,7 +8,7 @@ static collision_t COLLISION_QUEUE[MAX_COLLISIONS] = {0};
 extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
 // extern iceman_t ICEMAN[MAX_ICEMAN];
-extern player_t PLAYER;
+extern entity_t PLAYER;
 
 static void collision_iceman_platform(iceman_t *iceman, platform_t *platform)
 {
@@ -50,7 +50,7 @@ static void collision_iceman_platform(iceman_t *iceman, platform_t *platform)
     }
 }
 
-static void collision_player_platform(player_t *player, platform_t *platform)
+static void collision_player_platform(entity_t *player, platform_t *platform)
 {
     int player_top = player->rect.y;
     int player_bottom = player->rect.y + player->rect.h;
@@ -67,7 +67,8 @@ static void collision_player_platform(player_t *player, platform_t *platform)
     {
         player->rect.y = platform_top - player->rect.h;
         player->vel_y = 0;
-        player->is_jumping = 0;
+        if (player->state == STATE_JUMPING)
+            player->state = STATE_IDLE;
     }
     // Collision from below (player hitting their head on the platform)
     else if (player_top <= platform_bottom && player_bottom < platform_bottom &&
@@ -90,7 +91,7 @@ static void collision_player_platform(player_t *player, platform_t *platform)
     }
 }
 
-static void collision_player_icicle(player_t *player, icicle_t *icicle)
+static void collision_player_icicle(entity_t *player, icicle_t *icicle)
 {
     icicle->is_falling = 0;
     player->health -= 2 * icicle->mass;
@@ -108,7 +109,7 @@ static void collision_process(collision_t collision)
 
     if (type1 == TYPE_PLAYER && type2 == TYPE_PLATFORM)
     {
-        player_t *player = (player_t *)collision.obj1;
+        entity_t *player = (entity_t *)collision.obj1;
         platform_t *platform = (platform_t *)collision.obj2;
         collision_player_platform(player, platform);
     }
@@ -122,7 +123,7 @@ static void collision_process(collision_t collision)
 
     else if (type1 == TYPE_PLAYER && type2 == TYPE_ICICLE)
     {
-        player_t *player = (player_t *)collision.obj1;
+        entity_t *player = (entity_t *)collision.obj1;
         icicle_t *icicle = (icicle_t *)collision.obj2;
         collision_player_icicle(player, icicle);
     }

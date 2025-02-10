@@ -23,14 +23,14 @@ typedef struct iceman
     Movement movement;
     SDL_Texture *texture_left;
     SDL_Texture *texture_right;
-    void (*update)(struct iceman *, player_t *);
+    void (*update)(struct iceman *, entity_t *);
     void (*jump)(struct iceman *);
     void (*render)(SDL_Renderer *, struct iceman, camera_t);
 } iceman_t;
 
 void iceman_jump(iceman_t *self);
 // Updates are tied to the player
-void iceman_update(iceman_t *self, player_t *player);
+void iceman_update(iceman_t *self, entity_t *player);
 void iceman_render(SDL_Renderer *renderer, iceman_t iceman, camera_t camera);
 void iceman_initialize_all();
 

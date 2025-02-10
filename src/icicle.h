@@ -5,6 +5,7 @@
 #include <SDL2/SDL_image.h>
 #include "constants.h"
 #include "camera.h"
+#include "entity.h"
 
 typedef struct icicle
 {
