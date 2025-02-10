@@ -48,7 +48,19 @@ typedef struct entity
     void (*jump)(struct entity *);
     void (*move)(struct entity *);
     void (*render)(SDL_Renderer *, struct entity, camera_t);
-    void (*spawn)(entity_t);
+
+    // This union will hold entity specific data
+    union
+    {
+        struct
+        {
+        } player;
+
+        struct
+        {
+            Uint64 movement_state_change;
+        } enemy;
+    };
 } entity_t;
 
 void entity_jump(entity_t *self);

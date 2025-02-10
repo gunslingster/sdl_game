@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "collision.h"
 #include "keys.h"
+#include "enemies/iceman.h"
 
 extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
@@ -101,6 +102,11 @@ int main(int argc, char *argv[])
     player_spawn(player);
     PLAYER.texture = loadTexture("assets/images/caveman_right.png", renderer);
 
+    // Add a random iceman for now
+    SDL_Texture *iceman_texture = loadTexture("assets/images/iceman_right.png", renderer);
+    iceman_initialize_all(iceman_texture);
+    iceman_spawn();
+
     // Add a random platform for now
     platform_spawn(200, 430, 150, 50, 0, 0, 1, platform_texture);
 
@@ -175,6 +181,7 @@ int main(int argc, char *argv[])
         }
 
         icicle_update_all();
+        iceman_update_all();
         collision_check();
 
         if (PLAYER.health <= 0)
@@ -186,6 +193,7 @@ int main(int argc, char *argv[])
         cave_render(renderer, CAMERA.x, CAMERA.y);
         platform_render_all(renderer, CAMERA);
         icicle_render_all(renderer, CAMERA);
+        iceman_render_all(renderer, CAMERA);
         PLAYER.render(renderer, PLAYER, CAMERA);
         render_health_bar(renderer, &PLAYER, CAMERA);
         // Render time text

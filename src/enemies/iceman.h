@@ -6,32 +6,19 @@
 #include "../camera.h"
 #include "../constants.h"
 #include "../player.h"
+#include "../entity.h"
 
 #define MAX_ICEMAN 20
 
-typedef struct iceman
-{
-    entity_type_t type;
-    SDL_Rect rect;
-    float vel_x;
-    float vel_y;
-    float jump_str;
-    int is_jumping;
-    int max_health;
-    int health;
-    Uint64 movement_state_change;
-    Movement movement;
-    SDL_Texture *texture_left;
-    SDL_Texture *texture_right;
-    void (*update)(struct iceman *, entity_t *);
-    void (*jump)(struct iceman *);
-    void (*render)(SDL_Renderer *, struct iceman, camera_t);
-} iceman_t;
+extern entity_t ICEMAN[MAX_ICEMAN];
 
-void iceman_jump(iceman_t *self);
+void iceman_jump(entity_t *self);
 // Updates are tied to the player
-void iceman_update(iceman_t *self, entity_t *player);
-void iceman_render(SDL_Renderer *renderer, iceman_t iceman, camera_t camera);
-void iceman_initialize_all();
+void iceman_update(entity_t *self);
+void iceman_update_all();
+void iceman_render(SDL_Renderer *renderer, entity_t iceman, camera_t camera);
+void iceman_render_all(SDL_Renderer *renderer, camera_t camera);
+void iceman_initialize_all(SDL_Texture *texture);
+void iceman_spawn();
 
 #endif
