@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = -g -Wall -Wextra #set flags
 INCLUDES= -I/usr/include/SDL2/ #include sdl2 header files
 LIBS = -lSDL2 -lSDL2_image -lSDL2_ttf #link sdl2 libraries
-SRCS = $(wildcard src/*.c)
+SRCS = $(wildcard src/*.c) $(wildcard src/enemies/*.c)
 OBJS = $(SRCS:.c=.o)
 TARGET = build/main
 #TODO: send object files to build folder
