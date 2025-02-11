@@ -68,6 +68,12 @@ void player_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
     if (!self.is_active)
         return;
 
+    SDL_Rect src_rect = {
+        .x = 0, // X offset in sprite sheet
+        .y = 0, // Y position (if all frames are in one row)
+        .w = 50,
+        .h = 50};
+
     SDL_RendererFlip flip;
 
     switch (self.movement)
@@ -80,8 +86,13 @@ void player_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
         break;
     }
 
+    if (self.state == STATE_ATTACKING)
+    {
+        src_rect.x = 50;
+    }
+
     SDL_Rect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
-    SDL_RenderCopyEx(renderer, self.texture, NULL, &self_rect, 0, NULL, flip);
+    SDL_RenderCopyEx(renderer, self.texture, &src_rect, &self_rect, 0, NULL, flip);
 }
 
 void player_spawn(entity_t player)

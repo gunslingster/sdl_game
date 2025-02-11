@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     // Initialize player
     entity_t player = {.type = TYPE_PLAYER, .rect = {100, GROUND_LEVEL - 50 * 2, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .state = STATE_IDLE, .health = 100, .max_health = 100, .movement = RIGHT, .update = player_update, .jump = entity_jump, .render = player_render, .move = player_move, .is_active = 1};
     player_spawn(player);
-    PLAYER.texture = loadTexture("assets/images/caveman_right.png", renderer);
+    PLAYER.texture = loadTexture("assets/images/caveman_sprite_sheet.png", renderer);
 
     // Add a random iceman for now
     SDL_Texture *iceman_texture = loadTexture("assets/images/iceman_right.png", renderer);
@@ -140,6 +140,8 @@ int main(int argc, char *argv[])
                 {
                     PLAYER.jump(&PLAYER);
                 }
+                if (event.key.keysym.sym == SDLK_SPACE)
+                    PLAYER.state = STATE_ATTACKING;
 
                 break;
             }
