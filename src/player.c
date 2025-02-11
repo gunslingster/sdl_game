@@ -23,19 +23,19 @@ void player_move(entity_t *self)
     {
         self->vel_x = -3 * SPEED;
         self->movement = LEFT;
-        if (!self->state == STATE_JUMPING)
+        if ((self->state != STATE_JUMPING) && (self->state) != STATE_ATTACKING)
             self->state = STATE_WALKING;
     }
     else if (KEYS[SDL_SCANCODE_D])
     {
         self->vel_x = 3 * SPEED;
         self->movement = RIGHT;
-        if (!self->state == STATE_JUMPING)
+        if ((self->state != STATE_JUMPING) && (self->state) != STATE_ATTACKING)
             self->state = STATE_WALKING;
     }
     else
     {
-        if (!self->state == STATE_JUMPING)
+        if ((self->state != STATE_JUMPING) && (self->state) != STATE_ATTACKING)
             self->state = STATE_IDLE;
         self->vel_x = 0;
     }
@@ -61,6 +61,19 @@ void player_update(entity_t *self)
     if (self->rect.y >= GRID_HEIGHT * TILE_SIZE - self->rect.w)
         self->rect.y = GRID_HEIGHT * TILE_SIZE - self->rect.w;
     collision_check();
+
+    if (self->state == STATE_ATTACKING)
+    {
+        if (self->player.attack_frames < 5)
+        {
+            self->player.attack_frames++;
+        }
+        else
+        {
+            self->player.attack_frames = 0;
+            self->state = STATE_IDLE;
+        }
+    }
 }
 
 void player_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
@@ -87,9 +100,7 @@ void player_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
     }
 
     if (self.state == STATE_ATTACKING)
-    {
         src_rect.x = 50;
-    }
 
     SDL_Rect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
     SDL_RenderCopyEx(renderer, self.texture, &src_rect, &self_rect, 0, NULL, flip);

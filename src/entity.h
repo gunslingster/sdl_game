@@ -54,6 +54,7 @@ typedef struct entity
     {
         struct
         {
+            int attack_frames;
         } player;
 
         struct

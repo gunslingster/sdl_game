@@ -69,7 +69,7 @@ void iceman_update(entity_t *self)
         }
     }
 
-    if (!rand() % 1000)
+    if (rand() % 20 == 0)
         self->jump(self);
 
     // Screen boundaries
@@ -118,6 +118,7 @@ void iceman_initialize_all(SDL_Texture *texture)
         ICEMAN[i].rect.h = 50;
         ICEMAN[i].texture = texture;
         ICEMAN[i].health = 0;
+        ICEMAN[i].jump_str = -10;
         ICEMAN[i].max_health = 30;
         ICEMAN[i].update = iceman_update;
         ICEMAN[i].render = iceman_render;
