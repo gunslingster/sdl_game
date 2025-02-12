@@ -28,7 +28,8 @@ typedef enum
     STATE_IDLE,
     STATE_WALKING,
     STATE_JUMPING,
-    STATE_ATTACKING
+    STATE_ATTACKING,
+    STATE_BOUNCING,
 } entity_state_t;
 
 typedef struct entity
@@ -55,6 +56,7 @@ typedef struct entity
         struct
         {
             int attack_frames;
+            int bounce_frames;
         } player;
 
         struct

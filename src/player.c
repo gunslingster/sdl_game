@@ -11,31 +11,34 @@ void player_jump(entity_t *self)
     if (!self->is_active)
         return;
 
-    entity_jump(self);
+    if (!self->state == STATE_BOUNCING)
+        entity_jump(self);
 }
 
 void player_move(entity_t *self)
 {
     if (!self->is_active)
         return;
+    if (self->state == STATE_BOUNCING)
+        return;
 
     if (KEYS[SDL_SCANCODE_A])
     {
         self->vel_x = -3 * SPEED;
         self->movement = LEFT;
-        if ((self->state != STATE_JUMPING) && (self->state) != STATE_ATTACKING)
+        if ((self->state != STATE_JUMPING) && (self->state != STATE_ATTACKING))
             self->state = STATE_WALKING;
     }
     else if (KEYS[SDL_SCANCODE_D])
     {
         self->vel_x = 3 * SPEED;
         self->movement = RIGHT;
-        if ((self->state != STATE_JUMPING) && (self->state) != STATE_ATTACKING)
+        if ((self->state != STATE_JUMPING) && (self->state != STATE_ATTACKING))
             self->state = STATE_WALKING;
     }
     else
     {
-        if ((self->state != STATE_JUMPING) && (self->state) != STATE_ATTACKING)
+        if ((self->state != STATE_JUMPING) && (self->state != STATE_ATTACKING))
             self->state = STATE_IDLE;
         self->vel_x = 0;
     }
@@ -64,13 +67,26 @@ void player_update(entity_t *self)
 
     if (self->state == STATE_ATTACKING)
     {
-        if (self->player.attack_frames < 5)
+        if (self->player.attack_frames < 20)
         {
             self->player.attack_frames++;
         }
         else
         {
             self->player.attack_frames = 0;
+            self->state = STATE_IDLE;
+        }
+    }
+    if (self->state == STATE_BOUNCING)
+    {
+        if (self->player.bounce_frames < 3)
+        {
+            self->player.bounce_frames++;
+        }
+        else
+        {
+            self->player.bounce_frames = 0;
+            self->vel_x = 0;
             self->state = STATE_IDLE;
         }
     }

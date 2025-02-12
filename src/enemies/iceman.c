@@ -18,6 +18,13 @@ void iceman_update(entity_t *self)
 {
     if (!self->is_active)
         return;
+
+    if (self->health < 0)
+    {
+        self->is_active = 0;
+        self->rect.x = -100;
+    }
+
     // Apply gravity and movement
     self->vel_y += GRAVITY;
     self->rect.y += self->vel_y;
@@ -69,7 +76,7 @@ void iceman_update(entity_t *self)
         }
     }
 
-    if (rand() % 20 == 0)
+    if (rand() % 200 == 0)
         self->jump(self);
 
     // Screen boundaries
@@ -94,6 +101,8 @@ void iceman_update_all()
 
 void iceman_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
 {
+    if (!self.is_active)
+        return;
     entity_render(renderer, self, camera);
 }
 

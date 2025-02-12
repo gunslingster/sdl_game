@@ -105,7 +105,6 @@ int main(int argc, char *argv[])
     // Add a random iceman for now
     SDL_Texture *iceman_texture = loadTexture("assets/images/iceman_right.png", renderer);
     iceman_initialize_all(iceman_texture);
-    iceman_spawn();
 
     // Add a random platform for now
     platform_spawn(200, 430, 150, 50, 0, 0, 1, platform_texture);
@@ -171,6 +170,8 @@ int main(int argc, char *argv[])
             CAMERA.x = GRID_WIDTH * TILE_SIZE - (WIN_WIDTH);
         if (CAMERA.y > GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT))
             CAMERA.y = GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT);
+        if ((rand() % 100) == 0)
+            iceman_spawn();
 
         if (timer >= 10)
         {

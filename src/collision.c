@@ -9,6 +9,63 @@ extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
 extern entity_t PLAYER;
 
+static void collision_entity_entity(entity_t *entity1, entity_t *entity2)
+{
+    if (entity1->state == STATE_ATTACKING)
+    {
+        entity2->health -= 10;
+        return;
+    }
+    else
+    {
+        entity1->health -= 5;
+    }
+
+    int entity1_top = entity1->rect.y;
+    int entity1_bottom = entity1->rect.y + entity1->rect.h;
+    int entity1_left = entity1->rect.x;
+    int entity1_right = entity1->rect.x + entity1->rect.w;
+    int entity2_top = entity2->rect.y;
+    int entity2_bottom = entity2->rect.y + entity2->rect.h;
+    int entity2_left = entity2->rect.x;
+    int entity2_right = entity2->rect.x + entity2->rect.w;
+
+    float bounce_factor = 2;
+
+    entity1->state = STATE_BOUNCING;
+
+    // Collision from the top (entity landing on the platform)
+    if (entity1_bottom >= entity2_top && entity1_top < entity2_top &&
+        entity1_right > entity2_left && entity1_left < entity2_right)
+    {
+        entity1->vel_y = -(entity1->vel_y);
+    }
+    // Collision from the top (entity landing on the platform)
+    if (entity2_bottom >= entity1_top && entity2_top < entity1_top &&
+        entity2_right > entity1_left && entity2_left < entity1_right)
+    {
+        entity2->vel_y = -(entity2->vel_y);
+    }
+    // Collision from below (entity1 hitting their head on the entity2)
+    else if (entity1_top <= entity2_bottom && entity1_bottom < entity2_bottom &&
+             entity1_right > entity2_left && entity1_left < entity2_right)
+    {
+        entity1->vel_y = -(entity1->vel_y);
+    }
+    // Collision from the left (entity1 hitting the right side of the entity2)
+    else if (entity1_right >= entity2_left && entity1_left < entity2_left &&
+             entity1_bottom > entity2_top && entity1_top < entity2_bottom)
+    {
+        entity1->vel_x = -(bounce_factor * SPEED);
+    }
+    // Collision from the right (entity1 hitting the left side of the entity2)
+    else if (entity1_left <= entity2_right && entity1_right > entity2_right &&
+             entity1_bottom > entity2_top && entity1_top < entity2_bottom)
+    {
+        entity1->vel_x = (bounce_factor * SPEED);
+    }
+}
+
 static void collision_entity_platform(entity_t *entity, platform_t *platform)
 {
     int entity_top = entity->rect.y;
@@ -86,6 +143,12 @@ static void collision_process(collision_t collision)
         platform_t *platform = (platform_t *)collision.obj2;
         collision_icicle_platform(icicle, platform);
     }
+    else if (type1 == TYPE_PLAYER && type2 == TYPE_ICEMAN)
+    {
+        entity_t *player = (entity_t *)collision.obj1;
+        entity_t *iceman = (entity_t *)collision.obj2;
+        collision_entity_entity(player, iceman);
+    }
 }
 
 void collision_check()
@@ -123,6 +186,14 @@ void collision_check()
                 collision_t collision = {.obj1 = (void *)&ICEMAN[j], .obj2 = (void *)&(PLATFORMS[i]), .type1 = PLAYER.type, .type2 = PLATFORMS[i].type};
                 collision_process(collision);
             }
+        }
+    }
+    for (int j = 0; j < (sizeof(ICEMAN) / sizeof(ICEMAN[0])); j++)
+    {
+        if (SDL_HasIntersection(&(ICEMAN[j].rect), &(PLAYER.rect)))
+        {
+            collision_t collision = {.obj1 = (void *)&PLAYER, .obj2 = (void *)&(ICEMAN[j]), .type1 = PLAYER.type, .type2 = ICEMAN[j].type};
+            collision_process(collision);
         }
     }
 }
