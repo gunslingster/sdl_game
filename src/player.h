@@ -13,5 +13,6 @@ void player_update(entity_t *self);
 void player_move(entity_t *self);
 void player_render(SDL_Renderer *renderer, entity_t player, camera_t camera);
 void player_spawn(entity_t player);
+void player_throw(entity_t *self);
 
 #endif

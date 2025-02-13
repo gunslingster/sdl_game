@@ -3,11 +3,13 @@
 #include "icicle.h"
 #include "enemies/iceman.h"
 #include "platform.h"
+#include "projectile.h"
 
 static collision_t COLLISION_QUEUE[MAX_COLLISIONS] = {0};
 extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
 extern entity_t PLAYER;
+extern projectile_t PROJECTILES[100];
 
 static void collision_entity_entity(entity_t *entity1, entity_t *entity2)
 {
@@ -64,6 +66,15 @@ static void collision_entity_entity(entity_t *entity1, entity_t *entity2)
     {
         entity1->vel_x = (bounce_factor * SPEED);
     }
+}
+
+static void collision_entity_projectile(entity_t *entity, projectile_t *projectile)
+{
+    if (entity->type == projectile->parent->type)
+        return;
+    entity->health -= 5;
+    // projectile->is_active = 0;
+    // projectile->rect.x = -100;
 }
 
 static void collision_entity_platform(entity_t *entity, platform_t *platform)
@@ -149,6 +160,12 @@ static void collision_process(collision_t collision)
         entity_t *iceman = (entity_t *)collision.obj2;
         collision_entity_entity(player, iceman);
     }
+    else if (type1 == TYPE_ICEMAN && collision.type2 == TYPE_PROJECTILE)
+    {
+        entity_t *iceman = (entity_t *)collision.obj1;
+        projectile_t *proj = (projectile_t *)collision.obj2;
+        collision_entity_projectile(iceman, proj);
+    }
 }
 
 void collision_check()
@@ -194,6 +211,14 @@ void collision_check()
         {
             collision_t collision = {.obj1 = (void *)&PLAYER, .obj2 = (void *)&(ICEMAN[j]), .type1 = PLAYER.type, .type2 = ICEMAN[j].type};
             collision_process(collision);
+        }
+        for (int k = 0; k < (sizeof(PROJECTILES) / sizeof(PROJECTILES[0])); k++)
+        {
+            if (SDL_HasIntersection(&(ICEMAN[j].rect), &(PROJECTILES[k].rect)))
+            {
+                collision_t collision = {.obj1 = (void *)&ICEMAN[j], .obj2 = (void *)&(PROJECTILES[k]), .type1 = ICEMAN[j].type, .type2 = PROJECTILES[k].type};
+                collision_process(collision);
+            }
         }
     }
 }

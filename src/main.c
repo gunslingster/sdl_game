@@ -14,11 +14,14 @@
 #include "collision.h"
 #include "keys.h"
 #include "enemies/iceman.h"
+#include "texture_manager.h"
+#include "projectile.h"
 
 extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
 extern camera_t CAMERA;
 extern entity_t PLAYER;
+extern projectile_t PROJECTILES;
 
 void render_health_bar(SDL_Renderer *renderer, entity_t *player, camera_t camera)
 {
@@ -82,11 +85,16 @@ int main(int argc, char *argv[])
 
     // Initialize SDL_image
     IMG_Init(IMG_INIT_PNG);
-    SDL_Texture *icicleTexture = loadTexture("assets/images/icicle.png", renderer);
+    // Load all the textures into the texture manager
+    init_texture_manager(&TEXTURE_MANAGER, renderer);
+    SDL_Texture *icicleTexture = load_texture(&TEXTURE_MANAGER, "assets/images/icicle.png", "icicle");
+    SDL_Texture *platform_texture = load_texture(&TEXTURE_MANAGER, "assets/images/2dplatform.png", "platform");
+    SDL_Texture *player_texture = load_texture(&TEXTURE_MANAGER, "assets/images/caveman_sprite_sheet.png", "player");
+    SDL_Texture *iceman_texture = load_texture(&TEXTURE_MANAGER, "assets/images/iceman_right.png", "iceman");
+    SDL_Texture *rock_texture = load_texture(&TEXTURE_MANAGER, "assets/images/rock.png", "rock");
     icicle_initialize_all(icicleTexture);
 
     // Initialize all the platforms
-    SDL_Texture *platform_texture = loadTexture("assets/images/2dplatform.png", renderer);
     platform_initialize_all(platform_texture);
 
     // Initialize cave
@@ -98,12 +106,11 @@ int main(int argc, char *argv[])
     platform_spawn(0, GROUND_LEVEL, GRID_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL, 0, 0, 1, floor_texture);
 
     // Initialize player
-    entity_t player = {.type = TYPE_PLAYER, .rect = {100, GROUND_LEVEL - 50 * 2, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .state = STATE_IDLE, .health = 100, .max_health = 100, .movement = RIGHT, .update = player_update, .jump = entity_jump, .render = player_render, .move = player_move, .is_active = 1, .player.attack_frames = 0};
+    entity_t player = {.type = TYPE_PLAYER, .rect = {100, GROUND_LEVEL - 50 * 2, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .state = STATE_IDLE, .health = 100, .max_health = 100, .movement = RIGHT, .update = player_update, .jump = entity_jump, .render = player_render, .move = player_move, .throw = player_throw, .is_active = 1, .player.attack_frames = 0};
     player_spawn(player);
-    PLAYER.texture = loadTexture("assets/images/caveman_sprite_sheet.png", renderer);
+    PLAYER.texture = player_texture;
 
     // Add a random iceman for now
-    SDL_Texture *iceman_texture = loadTexture("assets/images/iceman_right.png", renderer);
     iceman_initialize_all(iceman_texture);
 
     // Add a random platform for now
@@ -141,6 +148,8 @@ int main(int argc, char *argv[])
                 }
                 if (event.key.keysym.sym == SDLK_SPACE)
                     PLAYER.state = STATE_ATTACKING;
+                if (event.key.keysym.sym == SDLK_m)
+                    PLAYER.throw(&PLAYER);
 
                 break;
             }
@@ -185,6 +194,7 @@ int main(int argc, char *argv[])
 
         icicle_update_all();
         iceman_update_all();
+        projectile_update_all();
         collision_check();
 
         if (PLAYER.health <= 0)
@@ -197,6 +207,7 @@ int main(int argc, char *argv[])
         platform_render_all(renderer, CAMERA);
         icicle_render_all(renderer, CAMERA);
         iceman_render_all(renderer, CAMERA);
+        projectile_render_all(renderer, CAMERA);
         PLAYER.render(renderer, PLAYER, CAMERA);
         render_health_bar(renderer, &PLAYER, CAMERA);
         // Render time text

@@ -43,3 +43,7 @@ void entity_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
 void entity_spawn(entity_t entity)
 {
 }
+
+void entity_throw(entity_t *self)
+{
+}

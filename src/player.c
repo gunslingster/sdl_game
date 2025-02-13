@@ -3,6 +3,8 @@
 #include "collision.h"
 #include "entity.h"
 #include "keys.h"
+#include "projectile.h"
+#include "texture_manager.h"
 
 entity_t PLAYER = {0};
 
@@ -13,6 +15,14 @@ void player_jump(entity_t *self)
 
     if (!self->state == STATE_BOUNCING)
         entity_jump(self);
+}
+
+void player_throw(entity_t *self)
+{
+    if (self->state == STATE_THROWING)
+        return;
+    projectile_spawn(self->rect.x, self->rect.y + self->rect.h / 2, 10, 10, get_texture(&TEXTURE_MANAGER, "rock"), (self->movement == RIGHT) ? SPEED * 4 : -SPEED * 4, 0, 1, 1, self);
+    self->state = STATE_THROWING;
 }
 
 void player_move(entity_t *self)
@@ -87,6 +97,18 @@ void player_update(entity_t *self)
         {
             self->player.bounce_frames = 0;
             self->vel_x = 0;
+            self->state = STATE_IDLE;
+        }
+    }
+    if (self->state == STATE_THROWING)
+    {
+        if (self->player.throw_frames < 3)
+        {
+            self->player.throw_frames++;
+        }
+        else
+        {
+            self->player.throw_frames = 0;
             self->state = STATE_IDLE;
         }
     }

@@ -21,6 +21,7 @@ typedef enum
     TYPE_ICICLE,
     TYPE_PLATFORM,
     TYPE_ICEMAN,
+    TYPE_PROJECTILE
 } entity_type_t;
 
 typedef enum
@@ -30,6 +31,7 @@ typedef enum
     STATE_JUMPING,
     STATE_ATTACKING,
     STATE_BOUNCING,
+    STATE_THROWING,
 } entity_state_t;
 
 typedef struct entity
@@ -49,6 +51,7 @@ typedef struct entity
     void (*jump)(struct entity *);
     void (*move)(struct entity *);
     void (*render)(SDL_Renderer *, struct entity, camera_t);
+    void (*throw)(struct entity *);
 
     // This union will hold entity specific data
     union
@@ -57,6 +60,7 @@ typedef struct entity
         {
             int attack_frames;
             int bounce_frames;
+            int throw_frames;
         } player;
 
         struct
@@ -68,6 +72,7 @@ typedef struct entity
 
 void entity_jump(entity_t *self);
 void entity_update(entity_t *self);
+void entity_throw(entity_t *self);
 void entity_move(entity_t *self);
 void entity_render(SDL_Renderer *renderer, entity_t entity, camera_t camera);
 void entity_spawn(entity_t entity);
