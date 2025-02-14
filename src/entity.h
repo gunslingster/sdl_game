@@ -46,21 +46,25 @@ typedef struct entity
     float jump_str;
     int max_health;
     int health;
+    int last_attack;
+    int last_throw;
+    int bounce_frames;
+    int attack_cooldown;
+    int throw_cooldown;
+    int is_cooldown;
     SDL_Texture *texture;
     void (*update)(struct entity *);
     void (*jump)(struct entity *);
     void (*move)(struct entity *);
     void (*render)(SDL_Renderer *, struct entity, camera_t);
     void (*throw)(struct entity *);
+    void (*attack)(struct entity *);
 
     // This union will hold entity specific data
     union
     {
         struct
         {
-            int attack_frames;
-            int bounce_frames;
-            int throw_frames;
         } player;
 
         struct
@@ -73,6 +77,7 @@ typedef struct entity
 void entity_jump(entity_t *self);
 void entity_update(entity_t *self);
 void entity_throw(entity_t *self);
+void entity_attack(entity_t *self);
 void entity_move(entity_t *self);
 void entity_render(SDL_Renderer *renderer, entity_t entity, camera_t camera);
 void entity_spawn(entity_t entity);

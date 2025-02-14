@@ -14,8 +14,13 @@ static void collision_entity_entity(entity_t *entity1, entity_t *entity2)
 {
     if (entity1->state == STATE_ATTACKING)
     {
-        entity2->health -= 10;
-        return;
+        if (!entity1->is_cooldown)
+        {
+            entity2->health -= 10;
+            return;
+        }
+        else
+            return;
     }
     else
     {
