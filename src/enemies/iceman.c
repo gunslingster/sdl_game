@@ -23,6 +23,7 @@ void iceman_update(entity_t *self)
     {
         self->is_active = 0;
         self->rect.x = -100;
+        return;
     }
 
     // Apply gravity and movement

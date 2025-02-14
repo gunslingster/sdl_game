@@ -6,15 +6,16 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_TEXTURES 100  // Adjust as needed
+#define MAX_TEXTURES 100 // Adjust as needed
 
-
-typedef struct {
+typedef struct
+{
     char key[128];        // Name of the texture (file path or alias)
     SDL_Texture *texture; // SDL Texture
 } texture_entry_t;
 
-typedef struct {
+typedef struct
+{
     SDL_Renderer *renderer;
     texture_entry_t textures[MAX_TEXTURES];
     int count;

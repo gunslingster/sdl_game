@@ -5,7 +5,6 @@
 #include "platform.h"
 #include "projectile.h"
 
-static collision_t COLLISION_QUEUE[MAX_COLLISIONS] = {0};
 extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
 extern entity_t PLAYER;
@@ -73,8 +72,7 @@ static void collision_entity_projectile(entity_t *entity, projectile_t *projecti
     if (entity->type == projectile->parent->type)
         return;
     entity->health -= 5;
-    // projectile->is_active = 0;
-    // projectile->rect.x = -100;
+    projectile->is_active = 0;
 }
 
 static void collision_entity_platform(entity_t *entity, platform_t *platform)
@@ -129,45 +127,6 @@ static void collision_icicle_platform(icicle_t *icicle, platform_t *platform)
     icicle->is_falling = 0;
 }
 
-static void collision_process(collision_t collision)
-{
-    entity_type_t type1 = collision.type1;
-    entity_type_t type2 = collision.type2;
-
-    if ((type1 == TYPE_PLAYER || type1 == TYPE_ICEMAN) && type2 == TYPE_PLATFORM)
-    {
-        entity_t *entity = (entity_t *)collision.obj1;
-        platform_t *platform = (platform_t *)collision.obj2;
-        collision_entity_platform(entity, platform);
-    }
-
-    else if (type1 == TYPE_PLAYER && type2 == TYPE_ICICLE)
-    {
-        entity_t *player = (entity_t *)collision.obj1;
-        icicle_t *icicle = (icicle_t *)collision.obj2;
-        collision_player_icicle(player, icicle);
-    }
-
-    else if (type1 == TYPE_ICICLE && type2 == TYPE_PLATFORM)
-    {
-        icicle_t *icicle = (icicle_t *)collision.obj1;
-        platform_t *platform = (platform_t *)collision.obj2;
-        collision_icicle_platform(icicle, platform);
-    }
-    else if (type1 == TYPE_PLAYER && type2 == TYPE_ICEMAN)
-    {
-        entity_t *player = (entity_t *)collision.obj1;
-        entity_t *iceman = (entity_t *)collision.obj2;
-        collision_entity_entity(player, iceman);
-    }
-    else if (type1 == TYPE_ICEMAN && collision.type2 == TYPE_PROJECTILE)
-    {
-        entity_t *iceman = (entity_t *)collision.obj1;
-        projectile_t *proj = (projectile_t *)collision.obj2;
-        collision_entity_projectile(iceman, proj);
-    }
-}
-
 void collision_check()
 {
     for (int i = 0; i < 100; i++)
@@ -176,15 +135,13 @@ void collision_check()
             continue;
         if (SDL_HasIntersection(&(PLAYER.rect), &(ICICLES[i].rect)))
         {
-            collision_t collision = {.obj1 = (void *)&PLAYER, .obj2 = (void *)&(ICICLES[i]), .type1 = PLAYER.type, .type2 = ICICLES[i].type};
-            collision_process(collision);
+            collision_player_icicle(&PLAYER, &ICICLES[i]);
         }
         for (int j = 0; j < (sizeof(PLATFORMS) / sizeof(PLATFORMS[0])); j++)
         {
             if (SDL_HasIntersection(&(ICICLES[i].rect), &(PLATFORMS[j].rect)))
             {
-                collision_t collision = {.obj1 = (void *)&(ICICLES[i]), .obj2 = (void *)&(PLATFORMS[j]), .type1 = TYPE_ICICLE, .type2 = TYPE_PLATFORM};
-                collision_process(collision);
+                collision_icicle_platform(&ICICLES[i], &PLATFORMS[j]);
             }
         }
     }
@@ -193,15 +150,13 @@ void collision_check()
     {
         if (SDL_HasIntersection(&(PLAYER.rect), &(PLATFORMS[i].rect)))
         {
-            collision_t collision = {.obj1 = (void *)&PLAYER, .obj2 = (void *)&(PLATFORMS[i]), .type1 = PLAYER.type, .type2 = PLATFORMS[i].type};
-            collision_process(collision);
+            collision_entity_platform(&PLAYER, &PLATFORMS[i]);
         }
         for (int j = 0; j < (sizeof(ICEMAN) / sizeof(ICEMAN[0])); j++)
         {
             if (SDL_HasIntersection(&(ICEMAN[j].rect), &(PLATFORMS[i].rect)))
             {
-                collision_t collision = {.obj1 = (void *)&ICEMAN[j], .obj2 = (void *)&(PLATFORMS[i]), .type1 = PLAYER.type, .type2 = PLATFORMS[i].type};
-                collision_process(collision);
+                collision_entity_platform(&ICEMAN[j], &PLATFORMS[i]);
             }
         }
     }
@@ -209,40 +164,14 @@ void collision_check()
     {
         if (SDL_HasIntersection(&(ICEMAN[j].rect), &(PLAYER.rect)))
         {
-            collision_t collision = {.obj1 = (void *)&PLAYER, .obj2 = (void *)&(ICEMAN[j]), .type1 = PLAYER.type, .type2 = ICEMAN[j].type};
-            collision_process(collision);
+            collision_entity_entity(&PLAYER, &ICEMAN[j]);
         }
         for (int k = 0; k < (sizeof(PROJECTILES) / sizeof(PROJECTILES[0])); k++)
         {
             if (SDL_HasIntersection(&(ICEMAN[j].rect), &(PROJECTILES[k].rect)))
             {
-                collision_t collision = {.obj1 = (void *)&ICEMAN[j], .obj2 = (void *)&(PROJECTILES[k]), .type1 = ICEMAN[j].type, .type2 = PROJECTILES[k].type};
-                collision_process(collision);
+                collision_entity_projectile(&ICEMAN[j], &PROJECTILES[k]);
             }
         }
-    }
-}
-
-void collision_add(collision_t collision)
-{
-    for (int i = 0; i < MAX_COLLISIONS; i++)
-    {
-        if (COLLISION_QUEUE[i].obj1 == NULL)
-        {
-            COLLISION_QUEUE[i] = collision;
-            break;
-        }
-    }
-}
-
-void collision_queue_process()
-{
-    for (int i = 0; i < MAX_COLLISIONS; i++)
-    {
-        if (COLLISION_QUEUE[i].obj1 == NULL)
-            continue;
-        collision_process(COLLISION_QUEUE[i]);
-        COLLISION_QUEUE[i].obj1 = NULL;
-        COLLISION_QUEUE[i].obj2 = NULL;
     }
 }
