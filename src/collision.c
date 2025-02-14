@@ -73,6 +73,7 @@ static void collision_entity_projectile(entity_t *entity, projectile_t *projecti
         return;
     entity->health -= 5;
     projectile->is_active = 0;
+    projectile->rect.x = -100;
 }
 
 static void collision_entity_platform(entity_t *entity, platform_t *platform)
