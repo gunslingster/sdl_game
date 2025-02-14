@@ -146,7 +146,7 @@ void iceman_spawn()
             ICEMAN[i].health = 30;
             ICEMAN[i].is_active = 1;
             int rand_x = rand() % (GRID_WIDTH * TILE_SIZE);
-            while((abs(rand_x - PLAYER.rect.x)) < 200){
+            while((abs(rand_x - PLAYER.rect.x)) < 150){
                 rand_x = rand() % (GRID_WIDTH * TILE_SIZE);
             }
             ICEMAN[i].rect.x = rand_x;
