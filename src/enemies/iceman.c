@@ -122,7 +122,7 @@ void iceman_initialize_all(SDL_Texture *texture)
     {
         ICEMAN[i].type = TYPE_ICEMAN;
         ICEMAN[i].is_active = 0;
-        ICEMAN[i].rect.x = 0;
+        ICEMAN[i].rect.x = -100;
         ICEMAN[i].rect.y = 400;
         ICEMAN[i].rect.w = 50;
         ICEMAN[i].rect.h = 50;
