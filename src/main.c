@@ -21,17 +21,18 @@ extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
 extern camera_t CAMERA;
 extern entity_t PLAYER;
+extern entity_t ICEMAN[MAX_ICEMAN];
 extern projectile_t PROJECTILES;
 
-void render_health_bar(SDL_Renderer *renderer, entity_t *player, camera_t camera)
+void render_health_bar(SDL_Renderer *renderer, entity_t *entity, camera_t camera)
 {
     int bar_width = 50; // Set a fixed width
     int bar_height = 10;
-    int bar_x = player->rect.x - camera.x;
-    int bar_y = player->rect.y - 15; // Position above entity
+    int bar_x = entity->rect.x - camera.x;
+    int bar_y = entity->rect.y - 15; // Position above entity
 
     // Calculate health percentage
-    float health_ratio = (float)player->health / player->max_health;
+    float health_ratio = (float)entity->health / entity->max_health;
     int green_width = (int)(bar_width * health_ratio);
 
     // Draw red background (empty health)
@@ -209,6 +210,8 @@ int main(int argc, char *argv[])
         iceman_render_all(renderer, CAMERA);
         projectile_render_all(renderer, CAMERA);
         PLAYER.render(renderer, PLAYER, CAMERA);
+        for (int i = 0; i < MAX_ICEMAN; i++)
+            render_health_bar(renderer, &ICEMAN[i], CAMERA);
         render_health_bar(renderer, &PLAYER, CAMERA);
         // Render time text
         renderText(renderer, font, time_text, 20, 20);

@@ -58,7 +58,6 @@ void player_move(entity_t *self)
 
 void player_update(entity_t *self)
 {
-    printf("ATTACK STATE: %d\n", self->state & STATE_ATTACKING);
     self->rect.x += self->vel_x;
     collision_check();
 

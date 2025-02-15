@@ -19,7 +19,7 @@ void iceman_update(entity_t *self)
     if (!self->is_active)
         return;
 
-    if (self->health < 0)
+    if (self->health <= 0)
     {
         self->is_active = 0;
         self->rect.x = -100;
@@ -146,7 +146,8 @@ void iceman_spawn()
             ICEMAN[i].health = 10;
             ICEMAN[i].is_active = 1;
             int rand_x = rand() % (GRID_WIDTH * TILE_SIZE);
-            while((abs(rand_x - PLAYER.rect.x)) < 150){
+            while ((abs(rand_x - PLAYER.rect.x)) < 150)
+            {
                 rand_x = rand() % (GRID_WIDTH * TILE_SIZE);
             }
             ICEMAN[i].rect.x = rand_x;
