@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     running = 0;
-                if (event.key.keysym.sym == SDLK_w && !(PLAYER.state == STATE_JUMPING))
+                if (event.key.keysym.sym == SDLK_w && !(PLAYER.state & STATE_JUMPING))
                 {
                     PLAYER.jump(&PLAYER);
                 }
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
             CAMERA.x = GRID_WIDTH * TILE_SIZE - (WIN_WIDTH);
         if (CAMERA.y > GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT))
             CAMERA.y = GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT);
-        if ((rand() % 100) == 0)
+        if ((rand() % 500) == 0)
             iceman_spawn();
 
         if (timer >= 10)

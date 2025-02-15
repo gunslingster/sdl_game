@@ -26,12 +26,12 @@ typedef enum
 
 typedef enum
 {
-    STATE_IDLE,
-    STATE_WALKING,
-    STATE_JUMPING,
-    STATE_ATTACKING,
-    STATE_BOUNCING,
-    STATE_THROWING,
+    STATE_IDLE = 0,
+    STATE_WALKING = 1 << 0,
+    STATE_JUMPING = 1 << 1,
+    STATE_ATTACKING = 1 << 2,
+    STATE_BOUNCING = 1 << 3,
+    STATE_THROWING = 1 << 4,
 } entity_state_t;
 
 typedef struct entity

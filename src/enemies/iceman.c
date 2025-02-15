@@ -129,7 +129,7 @@ void iceman_initialize_all(SDL_Texture *texture)
         ICEMAN[i].texture = texture;
         ICEMAN[i].health = 0;
         ICEMAN[i].jump_str = -10;
-        ICEMAN[i].max_health = 30;
+        ICEMAN[i].max_health = 10;
         ICEMAN[i].update = iceman_update;
         ICEMAN[i].render = iceman_render;
         ICEMAN[i].jump = iceman_jump;
@@ -143,7 +143,7 @@ void iceman_spawn()
     {
         if (ICEMAN[i].health <= 0 && !ICEMAN[i].is_active)
         {
-            ICEMAN[i].health = 30;
+            ICEMAN[i].health = 10;
             ICEMAN[i].is_active = 1;
             int rand_x = rand() % (GRID_WIDTH * TILE_SIZE);
             while((abs(rand_x - PLAYER.rect.x)) < 150){

@@ -13,15 +13,15 @@ void player_jump(entity_t *self)
     if (!self->is_active)
         return;
 
-    if (!self->state == STATE_BOUNCING)
+    if (!self->state & STATE_BOUNCING)
         entity_jump(self);
 }
 
 void player_throw(entity_t *self)
 {
-    if (self->is_cooldown)
+    if (self->is_cooldown || (self->state & STATE_ATTACKING) || (self->state & STATE_JUMPING))
         return;
-    self->state = STATE_THROWING;
+    self->state |= STATE_THROWING;
     projectile_spawn(self->rect.x, self->rect.y + self->rect.h / 2, 10, 10, get_texture(&TEXTURE_MANAGER, "rock"), (self->movement == RIGHT) ? SPEED * 4 : -SPEED * 4, 0, 1, 1, self);
     self->last_throw = SDL_GetTicks();
     self->is_cooldown = 1;
@@ -31,33 +31,34 @@ void player_move(entity_t *self)
 {
     if (!self->is_active)
         return;
-    if (self->state == STATE_BOUNCING)
+    if (self->state & STATE_BOUNCING)
         return;
 
     if (KEYS[SDL_SCANCODE_A])
     {
         self->vel_x = -3 * SPEED;
         self->movement = LEFT;
-        if ((self->state != STATE_JUMPING) && (self->state != STATE_ATTACKING) && (self->state != STATE_THROWING))
-            self->state = STATE_WALKING;
+        if (!(self->state & STATE_JUMPING) && !(self->state & STATE_ATTACKING) && !(self->state & STATE_THROWING))
+            self->state |= STATE_WALKING;
     }
     else if (KEYS[SDL_SCANCODE_D])
     {
         self->vel_x = 3 * SPEED;
         self->movement = RIGHT;
-        if ((self->state != STATE_JUMPING) && (self->state != STATE_ATTACKING) && (self->state != STATE_THROWING))
-            self->state = STATE_WALKING;
+        if (!(self->state & STATE_JUMPING) && !(self->state & STATE_ATTACKING) && !(self->state & STATE_THROWING))
+            self->state |= STATE_WALKING;
     }
     else
     {
-        if ((self->state != STATE_JUMPING) && (self->state != STATE_ATTACKING) && (self->state != STATE_THROWING))
-            self->state = STATE_IDLE;
+        if (!(self->state & STATE_JUMPING) && !(self->state & STATE_ATTACKING) && !(self->state & STATE_THROWING))
+            self->state |= STATE_IDLE;
         self->vel_x = 0;
     }
 }
 
 void player_update(entity_t *self)
 {
+    printf("ATTACK STATE: %d\n", self->state & STATE_ATTACKING);
     self->rect.x += self->vel_x;
     collision_check();
 
@@ -78,15 +79,15 @@ void player_update(entity_t *self)
     collision_check();
 
     int curr_time = SDL_GetTicks();
-    if (self->state == STATE_ATTACKING)
+    if (self->state & STATE_ATTACKING)
     {
         if ((curr_time - self->last_attack) / 1000 >= self->attack_cooldown)
         {
-            self->state = STATE_IDLE;
+            self->state ^= STATE_ATTACKING;
             self->is_cooldown = 0;
         }
     }
-    else if (self->state == STATE_BOUNCING)
+    else if (self->state & STATE_BOUNCING)
     {
         if (self->bounce_frames < 3)
         {
@@ -96,14 +97,14 @@ void player_update(entity_t *self)
         {
             self->bounce_frames = 0;
             self->vel_x = 0;
-            self->state = STATE_IDLE;
+            self->state ^= STATE_BOUNCING;
         }
     }
-    else if (self->state == STATE_THROWING)
+    else if (self->state & STATE_THROWING)
     {
         if ((curr_time - self->last_throw) / 1000 >= self->throw_cooldown)
         {
-            self->state = STATE_IDLE;
+            self->state ^= STATE_THROWING;
             self->is_cooldown = 0;
         }
     }
@@ -132,7 +133,7 @@ void player_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
         break;
     }
 
-    if (self.state == STATE_ATTACKING)
+    if (self.state & STATE_ATTACKING)
         src_rect.x = 50;
 
     SDL_Rect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
