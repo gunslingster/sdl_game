@@ -12,15 +12,24 @@ extern projectile_t PROJECTILES[100];
 
 static void collision_entity_entity(entity_t *entity1, entity_t *entity2)
 {
-    if (entity1->state & STATE_ATTACKING)
+    int curr_time = SDL_GetTicks();
+    if ((entity1->state & STATE_ATTACKING) && !entity2->is_damaged)
     {
+        entity2->last_damage = curr_time;
+        entity2->is_damaged = 1;
         entity2->health -= 10;
         entity2->vel_x -= SPEED;
         return;
     }
     else
     {
-        entity1->health -= 5;
+        if (!entity1->is_damaged)
+        {
+            entity1->health -= 5;
+            entity1->last_damage = curr_time;
+            entity1->is_damaged = 1;
+            return;
+        }
     }
 
     int entity1_top = entity1->rect.y;

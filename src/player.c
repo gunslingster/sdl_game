@@ -58,6 +58,10 @@ void player_move(entity_t *self)
 
 void player_update(entity_t *self)
 {
+    int curr_time = SDL_GetTicks();
+    if ((curr_time - self->last_damage) / 1000 >= self->damage_cooldown)
+        self->is_damaged = 0;
+
     self->rect.x += self->vel_x;
     collision_check();
 
@@ -77,7 +81,6 @@ void player_update(entity_t *self)
         self->rect.y = GRID_HEIGHT * TILE_SIZE - self->rect.w;
     collision_check();
 
-    int curr_time = SDL_GetTicks();
     if (self->state & STATE_ATTACKING)
     {
         if ((curr_time - self->last_attack) / 1000 >= self->attack_cooldown)

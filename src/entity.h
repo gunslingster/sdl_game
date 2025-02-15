@@ -52,6 +52,9 @@ typedef struct entity
     int attack_cooldown;
     int throw_cooldown;
     int is_cooldown;
+    int is_damaged;
+    int last_damage;
+    int damage_cooldown;
     SDL_Texture *texture;
     void (*update)(struct entity *);
     void (*jump)(struct entity *);
