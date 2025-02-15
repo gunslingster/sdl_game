@@ -4,10 +4,10 @@
 
 void entity_jump(entity_t *self)
 {
-    if (!(self->state == STATE_JUMPING))
+    if (!(self->state & STATE_JUMPING))
     {
         self->vel_y = self->jump_str;
-        self->state = STATE_JUMPING;
+        self->state |= STATE_JUMPING;
     }
 }
 
@@ -46,4 +46,18 @@ void entity_spawn(entity_t entity)
 
 void entity_throw(entity_t *self)
 {
+    if (self->is_cooldown || (self->state & STATE_JUMPING))
+        return;
+    self->state |= STATE_THROWING;
+    self->last_throw = SDL_GetTicks();
+    self->is_cooldown = 1;
+}
+
+void entity_attack(entity_t *self)
+{
+    if (self->is_cooldown)
+        return;
+    self->state |= STATE_ATTACKING;
+    self->last_attack = SDL_GetTicks();
+    self->is_cooldown = 1;
 }

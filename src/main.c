@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     platform_spawn(0, GROUND_LEVEL, GRID_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL, 0, 0, 1, floor_texture);
 
     // Initialize player
-    entity_t player = {.type = TYPE_PLAYER, .rect = {100, GROUND_LEVEL - 50 * 2, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .state = STATE_IDLE, .health = 100, .max_health = 100, .movement = RIGHT, .update = player_update, .jump = entity_jump, .render = player_render, .move = player_move, .throw = player_throw, .is_active = 1, .player.attack_frames = 0};
+    entity_t player = {.type = TYPE_PLAYER, .rect = {100, GROUND_LEVEL - 50 * 2, 50, 50}, .vel_x = 10, .vel_y = 0, .jump_str = -10, .state = STATE_IDLE, .health = 100, .max_health = 100, .movement = RIGHT, .update = player_update, .jump = entity_jump, .render = player_render, .move = player_move, .throw = player_throw, .is_active = 1, .bounce_frames = 3, .attack = entity_attack, .attack_cooldown = 1, .throw_cooldown = 1, .is_cooldown = 0};
     player_spawn(player);
     PLAYER.texture = player_texture;
 
@@ -142,12 +142,12 @@ int main(int argc, char *argv[])
 
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     running = 0;
-                if (event.key.keysym.sym == SDLK_w && !(PLAYER.state == STATE_JUMPING))
+                if (event.key.keysym.sym == SDLK_w && !(PLAYER.state & STATE_JUMPING))
                 {
                     PLAYER.jump(&PLAYER);
                 }
                 if (event.key.keysym.sym == SDLK_SPACE)
-                    PLAYER.state = STATE_ATTACKING;
+                    PLAYER.attack(&PLAYER);
                 if (event.key.keysym.sym == SDLK_m)
                     PLAYER.throw(&PLAYER);
 
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
             CAMERA.x = GRID_WIDTH * TILE_SIZE - (WIN_WIDTH);
         if (CAMERA.y > GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT))
             CAMERA.y = GRID_HEIGHT * TILE_SIZE - (WIN_HEIGHT);
-        if ((rand() % 100) == 0)
+        if ((rand() % 500) == 0)
             iceman_spawn();
 
         if (timer >= 10)

@@ -12,10 +12,16 @@ extern projectile_t PROJECTILES[100];
 
 static void collision_entity_entity(entity_t *entity1, entity_t *entity2)
 {
-    if (entity1->state == STATE_ATTACKING)
+    if (entity1->state & STATE_ATTACKING)
     {
-        entity2->health -= 10;
-        return;
+        if (!entity1->is_cooldown)
+        {
+            entity2->health -= 10;
+            entity2->vel_x -= SPEED;
+            return;
+        }
+        else
+            return;
     }
     else
     {
@@ -33,7 +39,7 @@ static void collision_entity_entity(entity_t *entity1, entity_t *entity2)
 
     float bounce_factor = 2;
 
-    entity1->state = STATE_BOUNCING;
+    entity1->state |= STATE_BOUNCING;
 
     // Collision from the top (entity landing on the platform)
     if (entity1_bottom >= entity2_top && entity1_top < entity2_top &&
@@ -93,8 +99,8 @@ static void collision_entity_platform(entity_t *entity, platform_t *platform)
     {
         entity->rect.y = platform_top - entity->rect.h;
         entity->vel_y = 0;
-        if (entity->state == STATE_JUMPING)
-            entity->state = STATE_IDLE;
+        if (entity->state & STATE_JUMPING)
+            entity->state ^= STATE_JUMPING;
     }
     // Collision from below (entity hitting their head on the platform)
     else if (entity_top <= platform_bottom && entity_bottom < platform_bottom &&
