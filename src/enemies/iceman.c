@@ -46,6 +46,20 @@ void iceman_update(entity_t *self)
         self->movement = LEFT;
     }
 
+    if (self->state & STATE_BOUNCING)
+    {
+        if (self->bounce_frames < 3)
+        {
+            self->bounce_frames++;
+        }
+        else
+        {
+            self->bounce_frames = 0;
+            self->vel_x = 0;
+            self->state ^= STATE_BOUNCING;
+        }
+    }
+
     // When player is out of view
     // We want to periodically pace back and forth and change directions
     if (abs(self->rect.x - PLAYER.rect.x) > WIN_WIDTH)
@@ -72,14 +86,24 @@ void iceman_update(entity_t *self)
     // Otherwise follow the player slowly
     else
     {
-        int pos_diff = self->rect.x - PLAYER.rect.x;
-        if (pos_diff > 0)
+        if (rand() % 200 == 0)
         {
-            self->vel_x = -SPEED;
-        }
-        else if (pos_diff < 0)
-        {
-            self->vel_x = SPEED;
+            int pos_diff = self->rect.x - PLAYER.rect.x;
+            if (rand() % 2 == 0)
+            {
+                if (pos_diff > 0)
+                {
+                    self->vel_x = -SPEED;
+                }
+                else if (pos_diff < 0)
+                {
+                    self->vel_x = SPEED;
+                }
+            }
+            else
+            {
+                self->vel_x = 0;
+            }
         }
     }
 

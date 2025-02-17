@@ -21,6 +21,10 @@ static void collision_entity_entity(entity_t *entity1, entity_t *entity2)
         entity2->vel_x -= SPEED;
         return;
     }
+    else if (entity1->state & STATE_ATTACKING)
+    {
+        return;
+    }
     else
     {
         if (!entity1->is_damaged)
@@ -30,6 +34,11 @@ static void collision_entity_entity(entity_t *entity1, entity_t *entity2)
             entity1->is_damaged = 1;
             return;
         }
+    }
+
+    if (entity1->state & STATE_BOUNCING)
+    {
+        return;
     }
 
     int entity1_top = entity1->rect.y;
@@ -44,6 +53,7 @@ static void collision_entity_entity(entity_t *entity1, entity_t *entity2)
     float bounce_factor = 2;
 
     entity1->state |= STATE_BOUNCING;
+    entity2->state |= STATE_BOUNCING;
 
     // Collision from the top (entity landing on the platform)
     if (entity1_bottom >= entity2_top && entity1_top < entity2_top &&
@@ -68,12 +78,14 @@ static void collision_entity_entity(entity_t *entity1, entity_t *entity2)
              entity1_bottom > entity2_top && entity1_top < entity2_bottom)
     {
         entity1->vel_x = -(bounce_factor * SPEED);
+        entity2->vel_x = 0;
     }
     // Collision from the right (entity1 hitting the left side of the entity2)
     else if (entity1_left <= entity2_right && entity1_right > entity2_right &&
              entity1_bottom > entity2_top && entity1_top < entity2_bottom)
     {
         entity1->vel_x = (bounce_factor * SPEED);
+        entity2->vel_x = 0;
     }
 }
 
