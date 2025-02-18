@@ -16,6 +16,7 @@
 #include "enemies/iceman.h"
 #include "texture_manager.h"
 #include "projectile.h"
+#include "potions.h"
 
 extern icicle_t ICICLES[100];
 extern platform_t PLATFORMS[100];
@@ -23,6 +24,7 @@ extern camera_t CAMERA;
 extern entity_t PLAYER;
 extern entity_t ICEMAN[MAX_ICEMAN];
 extern projectile_t PROJECTILES;
+extern potion_t POTIONS[MAX_POTIONS];
 
 void render_health_bar(SDL_Renderer *renderer, entity_t *entity, camera_t camera)
 {
@@ -93,10 +95,14 @@ int main(int argc, char *argv[])
     SDL_Texture *player_texture = load_texture(&TEXTURE_MANAGER, "assets/images/caveman_sprite_sheet.png", "player");
     SDL_Texture *iceman_texture = load_texture(&TEXTURE_MANAGER, "assets/images/iceman_right.png", "iceman");
     SDL_Texture *rock_texture = load_texture(&TEXTURE_MANAGER, "assets/images/rock.png", "rock");
+    SDL_Texture *potion_texture = load_texture(&TEXTURE_MANAGER, "assets/images/potions_red.png", "potion");
     icicle_initialize_all(icicleTexture);
 
     // Initialize all the platforms
     platform_initialize_all(platform_texture);
+
+    // Initialize potions
+    potion_initialize_all();
 
     // Initialize cave
     cave_init();
@@ -151,6 +157,15 @@ int main(int argc, char *argv[])
                     PLAYER.attack(&PLAYER);
                 if (event.key.keysym.sym == SDLK_m)
                     PLAYER.throw(&PLAYER);
+                // Need a better way to handle this eventually
+                if (event.key.keysym.sym == SDLK_p)
+                    for (int i = 0; i < MAX_POTIONS; i++)
+                    {
+                        if (SDL_HasIntersection(&PLAYER.rect, &POTIONS[i].rect))
+                        {
+                            POTIONS[i].effect(&POTIONS[i], &PLAYER);
+                        }
+                    }
 
                 break;
             }
@@ -183,6 +198,9 @@ int main(int argc, char *argv[])
         if ((rand() % 200) == 0)
             iceman_spawn();
 
+        if ((rand() % 300) == 0)
+            potion_spawn();
+
         if (timer >= 10)
         {
             icicle_spawn();
@@ -209,6 +227,7 @@ int main(int argc, char *argv[])
         icicle_render_all(renderer, CAMERA);
         iceman_render_all(renderer, CAMERA);
         projectile_render_all(renderer, CAMERA);
+        potion_render_all(renderer, CAMERA);
         PLAYER.render(renderer, PLAYER, CAMERA);
         for (int i = 0; i < MAX_ICEMAN; i++)
             render_health_bar(renderer, &ICEMAN[i], CAMERA);
