@@ -22,7 +22,7 @@ void player_throw(entity_t *self)
     if (self->is_cooldown || (self->state & STATE_ATTACKING) || (self->state & STATE_JUMPING))
         return;
     self->state |= STATE_THROWING;
-    projectile_spawn(self->rect.x, self->rect.y + self->rect.h / 2, 10, 10, get_texture(&TEXTURE_MANAGER, "rock"), (self->movement == RIGHT) ? SPEED * 4 : -SPEED * 4, 0, 1, 1, self);
+    projectile_spawn(self->rect.x, self->rect.y + self->rect.h / 2, 50, 20, get_texture(&TEXTURE_MANAGER, "arrow"), (self->movement == RIGHT) ? SPEED * 4 : -SPEED * 4, 0, 1, 1, self);
     self->last_throw = SDL_GetTicks();
     self->is_cooldown = 1;
 }
@@ -112,14 +112,19 @@ void player_update(entity_t *self)
     }
 
     // If spear is active the hitbox should be bigger but longer cooldown
-    if (self->spear_active)
+    if (PLAYER.weapon == WEAPON_SPEAR)
     {
         self->hitbox.w = 30;
         self->attack_cooldown = 0.4;
     }
-    else
+    else if (PLAYER.weapon == WEAPON_CLUB)
     {
         self->hitbox.w = 15;
+        self->attack_cooldown = 0.2;
+    }
+    else
+    {
+        self->hitbox.w = 5;
         self->attack_cooldown = 0.2;
     }
 
@@ -160,14 +165,21 @@ void player_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
         break;
     }
 
-    if (self.spear_active && !(self.state & STATE_ATTACKING))
-        src_rect.x = 100;
-    else if (self.spear_active && (self.state & STATE_ATTACKING))
-        src_rect.x = 150;
-    else if (self.state & STATE_ATTACKING)
-        src_rect.x = 50;
-    else
+    switch (self.weapon)
+    {
+    case WEAPON_CLUB:
         src_rect.x = 0;
+        break;
+    case WEAPON_SPEAR:
+        src_rect.x = 100;
+        break;
+    case WEAPON_BOW:
+        src_rect.x = 200;
+        break;
+    }
+
+    if (self.state & STATE_ATTACKING || self.state & STATE_THROWING)
+        src_rect.x += 50;
 
     SDL_Rect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
     SDL_RenderCopyEx(renderer, self.texture, &src_rect, &self_rect, 0, NULL, flip);

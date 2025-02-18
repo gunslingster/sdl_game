@@ -34,11 +34,19 @@ typedef enum
     STATE_THROWING = 1 << 4,
 } entity_state_t;
 
+typedef enum
+{
+    WEAPON_CLUB,
+    WEAPON_SPEAR,
+    WEAPON_BOW
+} entity_weapon_t;
+
 typedef struct entity
 {
     entity_type_t type;
     entity_state_t state;
     entity_movement_t movement;
+    entity_weapon_t weapon;
     SDL_Rect rect;
     SDL_Rect hitbox;
     int is_active;
@@ -56,7 +64,7 @@ typedef struct entity
     int is_damaged;
     int last_damage;
     int damage_cooldown;
-    int spear_active;
+    int bow_active;
     SDL_Texture *texture;
     void (*update)(struct entity *);
     void (*jump)(struct entity *);

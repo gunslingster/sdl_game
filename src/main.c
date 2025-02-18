@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
     SDL_Texture *player_texture = load_texture(&TEXTURE_MANAGER, "assets/images/caveman_sprite_sheet.png", "player");
     SDL_Texture *iceman_texture = load_texture(&TEXTURE_MANAGER, "assets/images/iceman_right.png", "iceman");
     SDL_Texture *rock_texture = load_texture(&TEXTURE_MANAGER, "assets/images/rock.png", "rock");
+    SDL_Texture *arrow_texture = load_texture(&TEXTURE_MANAGER, "assets/images/arrow.png", "arrow");
     SDL_Texture *potion_texture = load_texture(&TEXTURE_MANAGER, "assets/images/potions_red.png", "potion");
     icicle_initialize_all(icicleTexture);
 
@@ -154,11 +155,23 @@ int main(int argc, char *argv[])
                     PLAYER.jump(&PLAYER);
                 }
                 if (event.key.keysym.sym == SDLK_SPACE)
-                    PLAYER.attack(&PLAYER);
+                {
+                    if (PLAYER.weapon == WEAPON_BOW)
+                        PLAYER.throw(&PLAYER);
+                    else
+                        PLAYER.attack(&PLAYER);
+                }
                 if (event.key.keysym.sym == SDLK_m)
                     PLAYER.throw(&PLAYER);
                 if (event.key.keysym.sym == SDLK_o)
-                    PLAYER.spear_active = ~(PLAYER.spear_active);
+                {
+                    if (PLAYER.weapon == WEAPON_CLUB)
+                        PLAYER.weapon = WEAPON_SPEAR;
+                    else if (PLAYER.weapon == WEAPON_SPEAR)
+                        PLAYER.weapon = WEAPON_BOW;
+                    else
+                        PLAYER.weapon = WEAPON_CLUB;
+                }
                 // Need a better way to handle this eventually
                 if (event.key.keysym.sym == SDLK_p)
                     for (int i = 0; i < MAX_POTIONS; i++)
