@@ -83,7 +83,7 @@ void player_update(entity_t *self)
 
     if (self->state & STATE_ATTACKING)
     {
-        if ((curr_time - self->last_attack) / 1000 >= self->attack_cooldown)
+        if ((float)(curr_time - self->last_attack) / 1000 >= self->attack_cooldown)
         {
             self->state ^= STATE_ATTACKING;
             self->is_cooldown = 0;
@@ -110,6 +110,31 @@ void player_update(entity_t *self)
             self->is_cooldown = 0;
         }
     }
+
+    // If spear is active the hitbox should be bigger but longer cooldown
+    if (self->spear_active)
+    {
+        self->hitbox.w = 30;
+        self->attack_cooldown = 0.4;
+    }
+    else
+    {
+        self->hitbox.w = 15;
+        self->attack_cooldown = 0.2;
+    }
+
+    if (self->movement == MOVEMENT_RIGHT)
+    {
+        self->hitbox.x = self->rect.x + self->rect.w;
+        self->hitbox.y = self->rect.y;
+        self->hitbox.h = self->rect.h;
+    }
+    else
+    {
+        self->hitbox.x = self->rect.x - self->rect.w;
+        self->hitbox.y = self->rect.y;
+        self->hitbox.h = self->rect.h;
+    }
 }
 
 void player_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
@@ -135,8 +160,14 @@ void player_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
         break;
     }
 
-    if (self.state & STATE_ATTACKING)
+    if (self.spear_active && !(self.state & STATE_ATTACKING))
+        src_rect.x = 100;
+    else if (self.spear_active && (self.state & STATE_ATTACKING))
+        src_rect.x = 150;
+    else if (self.state & STATE_ATTACKING)
         src_rect.x = 50;
+    else
+        src_rect.x = 0;
 
     SDL_Rect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
     SDL_RenderCopyEx(renderer, self.texture, &src_rect, &self_rect, 0, NULL, flip);

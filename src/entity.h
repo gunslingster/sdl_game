@@ -40,6 +40,7 @@ typedef struct entity
     entity_state_t state;
     entity_movement_t movement;
     SDL_Rect rect;
+    SDL_Rect hitbox;
     int is_active;
     float vel_x;
     float vel_y;
@@ -49,12 +50,13 @@ typedef struct entity
     int last_attack;
     int last_throw;
     int bounce_frames;
-    int attack_cooldown;
-    int throw_cooldown;
+    float attack_cooldown;
+    float throw_cooldown;
     int is_cooldown;
     int is_damaged;
     int last_damage;
     int damage_cooldown;
+    int spear_active;
     SDL_Texture *texture;
     void (*update)(struct entity *);
     void (*jump)(struct entity *);

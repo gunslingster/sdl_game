@@ -13,15 +13,7 @@ extern projectile_t PROJECTILES[100];
 static void collision_entity_entity(entity_t *entity1, entity_t *entity2)
 {
     int curr_time = SDL_GetTicks();
-    if ((entity1->state & STATE_ATTACKING) && !entity2->is_damaged)
-    {
-        entity2->last_damage = curr_time;
-        entity2->is_damaged = 1;
-        entity2->health -= 10;
-        entity2->vel_x -= SPEED;
-        return;
-    }
-    else if (entity1->state & STATE_ATTACKING)
+    if (entity1->state & STATE_ATTACKING)
     {
         return;
     }
@@ -185,6 +177,17 @@ void collision_check()
     }
     for (int j = 0; j < (sizeof(ICEMAN) / sizeof(ICEMAN[0])); j++)
     {
+        if (SDL_HasIntersection(&(ICEMAN[j].rect), &(PLAYER.hitbox)))
+        {
+            if (PLAYER.state & STATE_ATTACKING && !ICEMAN[j].is_damaged)
+            {
+                int curr_time = SDL_GetTicks();
+                ICEMAN[j].health -= 10;
+                ICEMAN[j].last_damage = curr_time;
+                ICEMAN[j].is_damaged = 1;
+                ICEMAN[j].vel_x = 0;
+            }
+        }
         if (SDL_HasIntersection(&(ICEMAN[j].rect), &(PLAYER.rect)))
         {
             collision_entity_entity(&PLAYER, &ICEMAN[j]);

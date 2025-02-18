@@ -31,6 +31,8 @@ void potion_effect(potion_t *self, entity_t *entity)
     if (!self->is_active)
         return;
     entity->health += self->health;
+    if (entity->health > entity->max_health)
+        entity->health = entity->max_health;
     self->is_active = 0;
 }
 
