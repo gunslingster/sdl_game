@@ -4,9 +4,49 @@
 #include "constants.h"
 #include "map.h"
 #include "platform.h"
+#include "texture_manager.h"
+#include "player.h"
 
 char cave[GRID_HEIGHT][GRID_WIDTH];
-extern PLATFORMS[100];
+float bg1_x = 0, bg2_x = 0, bg3_x = 0, bg4_x = 0;
+const float bg1_speed = 0.25f;
+const float bg2_speed = 0.5f;
+const float bg3_speed = 0.75f;
+const float bg4_speed = 1.0f;
+extern entity_t PLAYER;
+
+void background_init()
+{
+    load_texture(&TEXTURE_MANAGER, "assets/images/background1.png", "background1");
+    load_texture(&TEXTURE_MANAGER, "assets/images/background2.png", "background2");
+    load_texture(&TEXTURE_MANAGER, "assets/images/background3.png", "background3");
+    load_texture(&TEXTURE_MANAGER, "assets/images/background4b.png", "background4");
+}
+
+void background_update()
+{
+}
+
+void background_render(SDL_Renderer *renderer, camera_t camera)
+{
+    SDL_Rect dest = {0, 0, WIN_WIDTH, WIN_HEIGHT};
+
+    // Render each background twice to allow wrapping
+    for (int i = 0; i < 5; i++)
+    {
+        dest.x = (int)bg1_x - camera.x + i * WIN_WIDTH;
+        SDL_RenderCopy(renderer, get_texture(&TEXTURE_MANAGER, "background1"), NULL, &dest);
+
+        dest.x = (int)bg2_x - camera.x + i * WIN_WIDTH;
+        SDL_RenderCopy(renderer, get_texture(&TEXTURE_MANAGER, "background2"), NULL, &dest);
+
+        dest.x = (int)bg3_x - camera.x + i * WIN_WIDTH;
+        SDL_RenderCopy(renderer, get_texture(&TEXTURE_MANAGER, "background3"), NULL, &dest);
+
+        dest.x = (int)bg4_x - camera.x + i * WIN_WIDTH;
+        SDL_RenderCopy(renderer, get_texture(&TEXTURE_MANAGER, "background4"), NULL, &dest);
+    }
+}
 
 // Initialize cave grid randomly
 void cave_init()
