@@ -106,9 +106,10 @@ int main(int argc, char *argv[])
     potion_initialize_all();
 
     // Initialize cave
-    cave_init();
-    for (int i = 0; i < 5; i++)
-        cave_smooth(); // 5 iterations for a smoother look
+    background_init();
+    // cave_init();
+    // for (int i = 0; i < 5; i++)
+    //     cave_smooth(); // 5 iterations for a smoother look
     SDL_Texture *floor_texture = floor_init(renderer);
     SDL_Rect floor = {0, GROUND_LEVEL, WIN_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL};
     platform_spawn(0, GROUND_LEVEL, GRID_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL, 0, 0, 1, floor_texture);
@@ -195,6 +196,7 @@ int main(int argc, char *argv[])
         // Movement controls
         PLAYER.move(&PLAYER);
 
+        // background_update();
         // Update player state
         PLAYER.update(&PLAYER);
 
@@ -237,7 +239,8 @@ int main(int argc, char *argv[])
         // Render cave and player
         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
         SDL_RenderClear(renderer);
-        cave_render(renderer, CAMERA.x, CAMERA.y);
+        background_render(renderer, CAMERA);
+        // cave_render(renderer, CAMERA.x, CAMERA.y);
         platform_render_all(renderer, CAMERA);
         icicle_render_all(renderer, CAMERA);
         iceman_render_all(renderer, CAMERA);
