@@ -10,8 +10,8 @@ typedef struct projectile
     SDL_Rect rect;
     SDL_Texture *texture;
     entity_type_t type;
-    int vel_x;
-    int vel_y;
+    float vel_x;
+    float vel_y;
     int spawn_time;
     int lifetime;
     int is_active;

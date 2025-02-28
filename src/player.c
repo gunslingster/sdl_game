@@ -19,10 +19,10 @@ void player_jump(entity_t *self)
 
 void player_throw(entity_t *self)
 {
-    if (self->is_cooldown || (self->state & STATE_ATTACKING) || (self->state & STATE_JUMPING))
+    if (self->is_cooldown || (self->state & STATE_ATTACKING))
         return;
     self->state |= STATE_THROWING;
-    projectile_spawn(self->rect.x, self->rect.y + self->rect.h / 2, 50, 20, get_texture(&TEXTURE_MANAGER, "arrow"), (self->movement == RIGHT) ? SPEED * 4 : -SPEED * 4, 0, 1, 1, self);
+    projectile_spawn(self->rect.x, self->rect.y + self->rect.h / 2, 50, 20, get_texture(&TEXTURE_MANAGER, "arrow"), (self->movement == RIGHT) ? SPEED * 4 : -SPEED * 4, 0, 2, 1, self);
     self->last_throw = SDL_GetTicks();
     self->is_cooldown = 1;
 }
@@ -104,7 +104,7 @@ void player_update(entity_t *self)
     }
     else if (self->state & STATE_THROWING)
     {
-        if ((curr_time - self->last_throw) / 1000 >= self->throw_cooldown)
+        if (((float)(curr_time - self->last_throw) / 1000) >= self->throw_cooldown)
         {
             self->state ^= STATE_THROWING;
             self->is_cooldown = 0;

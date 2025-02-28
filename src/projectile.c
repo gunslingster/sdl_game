@@ -37,8 +37,6 @@ void projectile_update(projectile_t *self)
         return;
     }
     self->rect.x += self->vel_x;
-    self->vel_y += GRAVITY;
-    self->rect.y += self->vel_y;
 }
 
 void projectile_update_all()
