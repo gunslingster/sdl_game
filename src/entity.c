@@ -1,5 +1,8 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_surface.h>
+#include <SDL_image.h>
 #include "entity.h"
 
 void entity_jump(entity_t *self)
@@ -24,7 +27,7 @@ void entity_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
     if (!self.is_active)
         return;
 
-    SDL_RendererFlip flip;
+    SDL_FlipMode flip;
 
     switch (self.movement)
     {
@@ -36,8 +39,8 @@ void entity_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
         break;
     }
 
-    SDL_Rect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
-    SDL_RenderCopyEx(renderer, self.texture, NULL, &self_rect, 0, NULL, flip);
+    SDL_FRect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
+    SDL_RenderTextureRotated(renderer, self.texture, NULL, &self_rect, 0, NULL, flip);
 }
 
 void entity_spawn(entity_t entity)

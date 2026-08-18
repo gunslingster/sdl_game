@@ -1,8 +1,8 @@
 #ifndef ICICLE_H
 #define ICICLE_H
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 #include "constants.h"
 #include "camera.h"
 #include "entity.h"

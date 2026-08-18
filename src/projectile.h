@@ -1,8 +1,8 @@
 #ifndef PROJECTILE_H
 #define PROJECTILE_H
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include "entity.h"
 
 typedef struct projectile

@@ -1,8 +1,8 @@
 #include "keys.h"
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 // Define the global variable for keyboard state
-const Uint8 *KEYS = NULL;
+const bool *KEYS = NULL;
 
 void updateKeyboardState()
 {

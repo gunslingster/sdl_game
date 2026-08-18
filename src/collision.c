@@ -148,13 +148,13 @@ void collision_check()
     {
         if (!ICICLES[i].is_falling)
             continue;
-        if (SDL_HasIntersection(&(PLAYER.rect), &(ICICLES[i].rect)))
+        if (SDL_HasRectIntersection(&(PLAYER.rect), &(ICICLES[i].rect)))
         {
             collision_player_icicle(&PLAYER, &ICICLES[i]);
         }
         for (int j = 0; j < (sizeof(PLATFORMS) / sizeof(PLATFORMS[0])); j++)
         {
-            if (SDL_HasIntersection(&(ICICLES[i].rect), &(PLATFORMS[j].rect)))
+            if (SDL_HasRectIntersection(&(ICICLES[i].rect), &(PLATFORMS[j].rect)))
             {
                 collision_icicle_platform(&ICICLES[i], &PLATFORMS[j]);
             }
@@ -163,13 +163,13 @@ void collision_check()
 
     for (int i = 0; i < (sizeof(PLATFORMS) / sizeof(PLATFORMS[0])); i++)
     {
-        if (SDL_HasIntersection(&(PLAYER.rect), &(PLATFORMS[i].rect)))
+        if (SDL_HasRectIntersection(&(PLAYER.rect), &(PLATFORMS[i].rect)))
         {
             collision_entity_platform(&PLAYER, &PLATFORMS[i]);
         }
         for (int j = 0; j < (sizeof(ICEMAN) / sizeof(ICEMAN[0])); j++)
         {
-            if (SDL_HasIntersection(&(ICEMAN[j].rect), &(PLATFORMS[i].rect)))
+            if (SDL_HasRectIntersection(&(ICEMAN[j].rect), &(PLATFORMS[i].rect)))
             {
                 collision_entity_platform(&ICEMAN[j], &PLATFORMS[i]);
             }
@@ -177,7 +177,7 @@ void collision_check()
     }
     for (int j = 0; j < (sizeof(ICEMAN) / sizeof(ICEMAN[0])); j++)
     {
-        if (SDL_HasIntersection(&(ICEMAN[j].rect), &(PLAYER.hitbox)))
+        if (SDL_HasRectIntersection(&(ICEMAN[j].rect), &(PLAYER.hitbox)))
         {
             if (PLAYER.state & STATE_ATTACKING && !ICEMAN[j].is_damaged)
             {
@@ -188,13 +188,13 @@ void collision_check()
                 ICEMAN[j].vel_x = 0;
             }
         }
-        if (SDL_HasIntersection(&(ICEMAN[j].rect), &(PLAYER.rect)))
+        if (SDL_HasRectIntersection(&(ICEMAN[j].rect), &(PLAYER.rect)))
         {
             collision_entity_entity(&PLAYER, &ICEMAN[j]);
         }
         for (int k = 0; k < (sizeof(PROJECTILES) / sizeof(PROJECTILES[0])); k++)
         {
-            if (SDL_HasIntersection(&(ICEMAN[j].rect), &(PROJECTILES[k].rect)))
+            if (SDL_HasRectIntersection(&(ICEMAN[j].rect), &(PROJECTILES[k].rect)))
             {
                 collision_entity_projectile(&ICEMAN[j], &PROJECTILES[k]);
             }

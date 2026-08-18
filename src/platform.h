@@ -1,8 +1,8 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL3/SDL.h>
+#include <SDL_image.h>
 #include "camera.h"
 #include "constants.h"
 #include "entity.h"
@@ -16,7 +16,7 @@ typedef struct platform
     SDL_Texture *texture;
     int in_use;
     void (*update)(struct platform *);
-    void (*render)(SDL_Renderer *renderer, struct platform *, camera_t camera);
+    void (*render)(SDL_Renderer *renderer, struct platform, int camera_x);
 } platform_t;
 
 void platform_update(platform_t *platform);

@@ -1,4 +1,5 @@
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_pixels.h>
 #include <stdlib.h>
 #include <time.h>
 #include "constants.h"
@@ -29,22 +30,22 @@ void background_update()
 
 void background_render(SDL_Renderer *renderer, camera_t camera)
 {
-    SDL_Rect dest = {0, 0, WIN_WIDTH, WIN_HEIGHT};
+    SDL_FRect dest = {0, 0, WIN_WIDTH, WIN_HEIGHT};
 
     // Render each background twice to allow wrapping
     for (int i = 0; i < 5; i++)
     {
         dest.x = (int)bg1_x - camera.x + i * WIN_WIDTH;
-        SDL_RenderCopy(renderer, get_texture(&TEXTURE_MANAGER, "background1"), NULL, &dest);
+        SDL_RenderTexture(renderer, get_texture(&TEXTURE_MANAGER, "background1"), NULL, &dest);
 
         dest.x = (int)bg2_x - camera.x + i * WIN_WIDTH;
-        SDL_RenderCopy(renderer, get_texture(&TEXTURE_MANAGER, "background2"), NULL, &dest);
+        SDL_RenderTexture(renderer, get_texture(&TEXTURE_MANAGER, "background2"), NULL, &dest);
 
         dest.x = (int)bg3_x - camera.x + i * WIN_WIDTH;
-        SDL_RenderCopy(renderer, get_texture(&TEXTURE_MANAGER, "background3"), NULL, &dest);
+        SDL_RenderTexture(renderer, get_texture(&TEXTURE_MANAGER, "background3"), NULL, &dest);
 
         dest.x = (int)bg4_x - camera.x + i * WIN_WIDTH;
-        SDL_RenderCopy(renderer, get_texture(&TEXTURE_MANAGER, "background4"), NULL, &dest);
+        SDL_RenderTexture(renderer, get_texture(&TEXTURE_MANAGER, "background4"), NULL, &dest);
     }
 }
 
@@ -117,7 +118,7 @@ void cave_render(SDL_Renderer *renderer, int camX, int camY)
                 continue;
 
             // Corrected tile positioning based on camera offset
-            SDL_Rect tile = {
+            SDL_FRect tile = {
                 x * TILE_SIZE - (camX % TILE_SIZE), // Adjust for smooth scrolling
                 y * TILE_SIZE - (camY % TILE_SIZE),
                 TILE_SIZE, TILE_SIZE};
@@ -130,53 +131,70 @@ void cave_render(SDL_Renderer *renderer, int camX, int camY)
 
 SDL_Texture *floor_init(SDL_Renderer *renderer)
 {
-    int floorWidth = GRID_WIDTH * TILE_SIZE; // Make it as wide as the entire world
+    int floorWidth = GRID_WIDTH * TILE_SIZE;
     int floorHeight = WIN_HEIGHT - GROUND_LEVEL;
-    SDL_Surface *surface = SDL_CreateRGBSurface(0, floorWidth, floorHeight, 32, 0, 0, 0, 0);
+
+    SDL_Surface *surface =
+        SDL_CreateSurface(floorWidth, floorHeight, SDL_PIXELFORMAT_RGBA8888);
+
     if (!surface)
     {
-        printf("Failed to create surface: %s\n", SDL_GetError());
+        SDL_Log("Failed to create surface: %s", SDL_GetError());
         return NULL;
     }
 
-    SDL_LockSurface(surface);
+    if (!SDL_LockSurface(surface))
+    {
+        SDL_Log("Failed to lock surface: %s", SDL_GetError());
+        SDL_DestroySurface(surface);
+        return NULL;
+    }
+
     Uint32 *pixels = (Uint32 *)surface->pixels;
+    int pitch = surface->pitch;
 
     for (int y = 0; y < surface->h; y += TILE_SIZE)
     {
         for (int x = 0; x < surface->w; x += TILE_SIZE)
         {
-            int color = rand() % 40 + 100; // Random shade variation
-            Uint32 pixelColor = SDL_MapRGB(surface->format, color, color / 2, color / 3);
+            int color = rand() % 40 + 100;
 
-            for (int ty = 0; ty < TILE_SIZE; ty++)
+            Uint32 pixelColor =
+                SDL_MapSurfaceRGB(surface, color, color / 2, color / 3);
+
+            for (int ty = 0; ty < TILE_SIZE && y + ty < surface->h; ty++)
             {
-                for (int tx = 0; tx < TILE_SIZE; tx++)
+                for (int tx = 0; tx < TILE_SIZE && x + tx < surface->w; tx++)
                 {
-                    int px = (y + ty) * surface->w + (x + tx);
-                    if (px < surface->w * surface->h)
-                        pixels[px] = pixelColor;
+                    Uint8 *row =
+                        (Uint8 *)surface->pixels + (y + ty) * pitch;
+
+                    ((Uint32 *)row)[x + tx] = pixelColor;
                 }
             }
         }
     }
 
     SDL_UnlockSurface(surface);
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
+
+    SDL_Texture *texture =
+        SDL_CreateTextureFromSurface(renderer, surface);
+
+    SDL_DestroySurface(surface);
 
     if (!texture)
-        printf("Failed to create texture: %s\n", SDL_GetError());
+    {
+        SDL_Log("Failed to create texture: %s", SDL_GetError());
+        return NULL;
+    }
 
     return texture;
-
-    // SDL_Rect floor = {0, GROUND_LEVEL, WIN_WIDTH * TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL};
 }
 
 void floor_render(SDL_Renderer *renderer, SDL_Texture *floorTexture, int camX)
 {
-    SDL_Rect srcRect = {camX, 0, WIN_WIDTH + TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL}; // Select part of the texture
-    SDL_Rect destRect = {0, GROUND_LEVEL + 50, WIN_WIDTH + TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL};
+    SDL_FRect srcRect = {camX, 0, WIN_WIDTH + TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL}; // Select part of the texture
+    SDL_FRect destRect = {0, GROUND_LEVEL + 50, WIN_WIDTH + TILE_SIZE, WIN_HEIGHT - GROUND_LEVEL};
 
-    SDL_RenderCopy(renderer, floorTexture, &srcRect, &destRect);
+    SDL_RenderTexture(renderer, floorTexture, &srcRect, &destRect);
 }

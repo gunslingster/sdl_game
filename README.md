@@ -1,9 +1,9 @@
 # SDL Game
 
-First game using **SDL2**
+First game using **SDL3**
 
 ## Installation (Linux)
-To install SDL2 and required dependencies, run:
+To install SDL3 and required dependencies, run:
 ```sh
 sudo apt install libsdl2-2.0-0
 sudo apt install libsdl2-dev

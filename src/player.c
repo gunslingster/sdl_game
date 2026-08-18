@@ -34,6 +34,10 @@ void player_move(entity_t *self)
     if (self->state & STATE_BOUNCING)
         return;
 
+    
+    if (KEYS == NULL)       
+        return;
+
     if (KEYS[SDL_SCANCODE_A])
     {
         self->vel_x = -3 * SPEED;
@@ -147,13 +151,13 @@ void player_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
     if (!self.is_active)
         return;
 
-    SDL_Rect src_rect = {
+    SDL_FRect src_rect = {
         .x = 0, // X offset in sprite sheet
         .y = 0, // Y position (if all frames are in one row)
         .w = 50,
         .h = 50};
 
-    SDL_RendererFlip flip;
+    SDL_FlipMode flip;
 
     switch (self.movement)
     {
@@ -181,8 +185,8 @@ void player_render(SDL_Renderer *renderer, entity_t self, camera_t camera)
     if (self.state & STATE_ATTACKING || self.state & STATE_THROWING)
         src_rect.x += 50;
 
-    SDL_Rect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
-    SDL_RenderCopyEx(renderer, self.texture, &src_rect, &self_rect, 0, NULL, flip);
+    SDL_FRect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
+    SDL_RenderTextureRotated(renderer, self.texture, &src_rect, &self_rect, 0, NULL, flip);
 }
 
 void player_spawn(entity_t player)

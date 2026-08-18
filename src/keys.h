@@ -1,10 +1,10 @@
 #ifndef KEYS_H
 #define KEYS_H
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 // Declare the global variable for keyboard state
-extern const Uint8 *KEYS;
+extern const bool *KEYS;
 
 // Function to update the keyboard state
 void updateKeyboardState();

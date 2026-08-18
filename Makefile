@@ -1,8 +1,8 @@
 #define compiler
 CC = gcc 
 CFLAGS = -g -Wall -Wextra #set flags
-INCLUDES= -I/usr/include/SDL2/ #include sdl2 header files
-LIBS = -lSDL2 -lSDL2_image -lSDL2_ttf #link sdl2 libraries
+INCLUDES= -I/usr/local/include/SDL3/  -I/usr/local/include/SDL3_image -I/usr/local/include/SDL3_ttf#include sdl3 header files
+LIBS = -lSDL3 -lSDL3_image -lSDL3_ttf #link sdl3 libraries
 SRCS = $(wildcard src/*.c) $(wildcard src/enemies/*.c)
 OBJS = $(SRCS:.c=.o)
 TARGET = build/main

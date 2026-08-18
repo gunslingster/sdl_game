@@ -64,7 +64,7 @@ void iceman_update(entity_t *self)
     // We want to periodically pace back and forth and change directions
     if (abs(self->rect.x - PLAYER.rect.x) > WIN_WIDTH)
     {
-        Uint64 curr_time = SDL_GetTicks64();
+        Uint64 curr_time = SDL_GetTicks();
         if ((curr_time - self->enemy.movement_state_change) > 3000)
         {
             switch (rand() % 4)
@@ -80,7 +80,7 @@ void iceman_update(entity_t *self)
                 break;
             }
 
-            self->enemy.movement_state_change = SDL_GetTicks64();
+            self->enemy.movement_state_change = SDL_GetTicks();
         }
     }
     // Otherwise follow the player slowly

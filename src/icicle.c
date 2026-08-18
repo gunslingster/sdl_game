@@ -1,6 +1,9 @@
 #include "icicle.h"
 #include "time.h"
 #include "utils.h"
+#include <SDL3/SDL_rect.h>
+#include <stdlib.h>
+#include <SDL3/SDL_render.h>
 
 icicle_t ICICLES[100] = {0};
 
@@ -91,12 +94,12 @@ void icicle_render(SDL_Renderer *renderer, icicle_t self, camera_t camera)
 {
     if (self.is_falling)
     {
-        SDL_Rect render_rect = {
+        SDL_FRect render_rect = {
             self.rect.x - camera.x, // Adjust for camera
             self.rect.y,
             self.rect.w,
             self.rect.h};
-        SDL_RenderCopy(renderer, self.texture, NULL, &render_rect);
+        SDL_RenderTexture(renderer, self.texture, NULL, &render_rect);
     }
 }
 

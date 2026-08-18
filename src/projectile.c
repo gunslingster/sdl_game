@@ -53,8 +53,8 @@ void projectile_render(SDL_Renderer *renderer, projectile_t self, camera_t camer
 {
     if (!self.is_active)
         return;
-    SDL_Rect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
-    SDL_RenderCopy(renderer, self.texture, NULL, &self_rect);
+    SDL_FRect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
+    SDL_RenderTexture(renderer, self.texture, NULL, &self_rect);
 }
 
 void projectile_render_all(SDL_Renderer *renderer, camera_t camera)

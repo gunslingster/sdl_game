@@ -1,5 +1,6 @@
 #include "potions.h"
 #include "texture_manager.h"
+#include <stdlib.h>
 
 potion_t POTIONS[MAX_POTIONS] = {0};
 
@@ -8,14 +9,14 @@ void potion_render(SDL_Renderer *renderer, potion_t self, camera_t camera)
     if (!self.is_active)
         return;
 
-    SDL_Rect src_rect = {
+    SDL_FRect src_rect = {
         .x = 0,   // X offset in sprite sheet
         .y = 200, // Y position (if all frames are in one row)
         .w = 50,
         .h = 50};
 
-    SDL_Rect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
-    SDL_RenderCopy(renderer, self.texture, &src_rect, &self_rect);
+    SDL_FRect self_rect = {self.rect.x - camera.x, self.rect.y, self.rect.w, self.rect.h};
+    SDL_RenderTexture(renderer, self.texture, &src_rect, &self_rect);
 }
 
 void potion_render_all(SDL_Renderer *renderer, camera_t camera)
